@@ -3,15 +3,30 @@
 
 const DIMENSIONES = [
   // Orden rueda LIDS clásica: 0 arriba, sentido horario 0-7 como imagen referencia
-  { id: 'nuevo_concepto', nombre: '0) Nuevo concepto', fase: 'Transversal', detalle: 'Desmaterialización · Uso compartido · Integración funciones · De producto a servicio' },
-  { id: 'materiales_bajo_impacto', nombre: '1) Materiales bajo impacto', fase: 'Extracción / Materiales', detalle: 'Menos dañinos · Renovables · Bajo contenido energético · Reciclados · Reciclables' },
-  { id: 'reduccion_material', nombre: '2) Reducción materiales', fase: 'Extracción / Materiales', detalle: 'Reducción peso · Reducción volumen (transporte)' },
-  { id: 'produccion_limpia', nombre: '3) Producción limpia', fase: 'Producción', detalle: 'Tecnología limpia · Menos pasos · Energía menor y limpia · Menos residuo' },
-  { id: 'distribucion', nombre: '4) Distribución eficiente', fase: 'Distribución', detalle: 'Envase menor/limpio/reutilizable · Transporte eficiente · Logística eficiente' },
-  { id: 'impacto_uso', nombre: '5) Impacto en uso', fase: 'Uso', detalle: 'Menor consumo energía · Fuente limpia · Menos consumibles · Cero desperdicio' },
-  { id: 'vida_util', nombre: '6) Vida útil producto', fase: 'Uso', detalle: 'Fiabilidad y durabilidad · Fácil reparación · Modular · Diseño clásico · Vínculo usuario' },
-  { id: 'fin_vida', nombre: '7) Fin de vida', fase: 'Fin de vida', detalle: 'Reutilización · Remanufactura · Reciclaje materiales · Incineración limpia' }
+  // terms: cada término vinculado a su pregunta (q: 0 primera, 1 segunda) para pintar según respuesta
+  { id: 'nuevo_concepto', nombre: '0) Nuevo concepto', fase: 'Transversal',
+    terms: [{ t: 'Desmaterialización', q: 0 }, { t: 'Uso compartido', q: 1 }, { t: 'Integración funciones', q: 0 }, { t: 'De producto a servicio', q: 0 }] },
+  { id: 'materiales_bajo_impacto', nombre: '1) Materiales bajo impacto', fase: 'Extracción / Materiales',
+    terms: [{ t: 'Menos dañinos', q: 1 }, { t: 'Renovables', q: 0 }, { t: 'Bajo contenido energético', q: 0 }, { t: 'Reciclados', q: 0 }, { t: 'Reciclables', q: 0 }] },
+  { id: 'reduccion_material', nombre: '2) Reducción materiales', fase: 'Extracción / Materiales',
+    terms: [{ t: 'Reducción peso', q: 0 }, { t: 'Reducción volumen', q: 1 }] },
+  { id: 'produccion_limpia', nombre: '3) Producción limpia', fase: 'Producción',
+    terms: [{ t: 'Tecnología limpia', q: 0 }, { t: 'Menos pasos', q: 0 }, { t: 'Energía menor y limpia', q: 1 }, { t: 'Menos residuo', q: 0 }] },
+  { id: 'distribucion', nombre: '4) Distribución eficiente', fase: 'Distribución',
+    terms: [{ t: 'Envase menor/limpio/reutilizable', q: 1 }, { t: 'Transporte eficiente', q: 0 }, { t: 'Logística eficiente', q: 0 }] },
+  { id: 'impacto_uso', nombre: '5) Impacto en uso', fase: 'Uso',
+    terms: [{ t: 'Menor consumo energía', q: 0 }, { t: 'Fuente limpia', q: 0 }, { t: 'Menos consumibles', q: 0 }, { t: 'Cero desperdicio', q: 1 }] },
+  { id: 'vida_util', nombre: '6) Vida útil producto', fase: 'Uso',
+    terms: [{ t: 'Fiabilidad y durabilidad', q: 0 }, { t: 'Fácil reparación', q: 0 }, { t: 'Estructura modular', q: 1 }, { t: 'Diseño clásico', q: 0 }, { t: 'Vínculo usuario', q: 1 }] },
+  { id: 'fin_vida', nombre: '7) Fin de vida', fase: 'Fin de vida',
+    terms: [{ t: 'Reutilización', q: 1 }, { t: 'Remanufactura', q: 1 }, { t: 'Reciclaje materiales', q: 0 }, { t: 'Incineración limpia', q: 0 }] }
 ];
+
+function mapaPreguntasPorDim() {
+  const m = {};
+  PREGUNTAS.forEach((p, i) => { (m[p.dim] = m[p.dim] || []).push(i); });
+  return m;
+}
 
 const PREGUNTAS = [
   { dim: 'materiales_bajo_impacto', texto: '¿Usa materiales reciclados, renovables o certificados bajo impacto?', desc: 'Ej. rPET, madera FSC, acero reciclado. 1=nada virgen tóxico, 5=mayoría certificada.' },
@@ -119,7 +134,7 @@ function finalizar() {
   window.__producto = prod;
   mostrarSeccion('resultados');
   generarGraficoRadar(scores, DIMENSIONES);
-  mostrarPuntuaciones(scores, DIMENSIONES);
+  mostrarPuntuaciones(scores, DIMENSIONES, respuestas, mapaPreguntasPorDim());
   mostrarSugerenciasLocales(scores, DIMENSIONES);
   const media = Object.values(scores).reduce((a, b) => a + b, 0) / DIMENSIONES.length;
   const peor = [...DIMENSIONES].sort((a, b) => scores[a.id] - scores[b.id])[0];

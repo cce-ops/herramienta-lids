@@ -90,17 +90,31 @@ function generarGraficoRadar(scores, dimensiones) {
   });
 }
 
-function mostrarPuntuaciones(scores, dimensiones) {
+function colorTermino(v) {
+  if (!v) return 'term-nd';
+  if (v >= 4) return 'term-ok';
+  if (v >= 3) return 'term-med';
+  return 'term-mal';
+}
+
+function mostrarPuntuaciones(scores, dimensiones, respuestas, mapa) {
   const cont = document.getElementById('puntuaciones');
   if (!cont) return;
   cont.innerHTML = '';
+  respuestas = respuestas || {};
   dimensiones.forEach(dim => {
     const v = scores[dim.id] || 0;
     const clase = v >= 4 ? 'puntuacion-alta' : (v >= 3 ? 'puntuacion-media' : 'puntuacion-baja');
     const div = document.createElement('div');
     div.className = 'puntuacion-item ' + clase;
+    const idxs = (mapa && mapa[dim.id]) || [];
+    const terms = (dim.terms || []).map(t => {
+      const qi = idxs[t.q];
+      const rv = (qi != null ? respuestas[qi] : 0) || 0;
+      return '<span class="' + colorTermino(rv) + '">' + t.t + '</span>';
+    }).join(' · ');
     div.innerHTML = '<strong>' + dim.nombre + ':</strong> ' + v.toFixed(1) + ' / 5' +
-      (dim.detalle ? '<br><small>' + dim.detalle + '</small>' : '');
+      (terms ? '<br><span class="terms">' + terms + '</span>' : '');
     cont.appendChild(div);
   });
 }
