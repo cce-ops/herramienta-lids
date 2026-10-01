@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico de Ecodiseño - Rueda LIDS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>🌿 Herramienta de Diagnóstico de Ecodiseño (Rueda LIDS)</h1>
+    <p class="sub">100% gratuita · Funciona sin internet · IA opcional</p>
+  </header>
+  <main>
+    <section id="intro">
+      <h2>¿Qué evalúa?</h2>
+      <p>Cuestionario guiado por fases del ciclo de vida. 16 preguntas en 8 estrategias LIDS. Resultado: gráfico radar + sugerencias técnicas.</p>
+      <ol class="fases-lista">
+        <li><strong>Materiales:</strong> bajo impacto + reducción uso</li>
+        <li><strong>Producción:</strong> técnicas limpias</li>
+        <li><strong>Distribución:</strong> logística y embalaje</li>
+        <li><strong>Uso:</strong> consumo + vida útil</li>
+        <li><strong>Fin de vida:</strong> desmontaje y reciclaje</li>
+        <li><strong>Transversal:</strong> nuevo concepto</li>
+      </ol>
+      <div class="producto-box">
+        <h3>📦 Tu producto</h3>
+        <p class="nota">Describe objeto diseñado. IA usa este contexto + puntuaciones LIDS para consejos específicos.</p>
+        <label>Nombre producto
+          <input type="text" id="producto-nombre" placeholder="Ej. Silla oficina modular" maxlength="80" autocomplete="off">
+        </label>
+        <label>Descripción: materiales, uso, fin vida previsto
+          <textarea id="producto-desc" rows="3" placeholder="Ej. Carcasa PP + estructura acero, uso oficina 8h/día, desmontable con tornillos..."></textarea>
+        </label>
+      </div>
+      <div class="fila">
+        <button id="btn-iniciar">Comenzar Cuestionario</button>
+        <button id="btn-config" class="secundario">⚙️ Configurar IA (opcional)</button>
+      </div>
+      <p class="nota">Sin clave API funciona igual: sugerencias locales automáticas. IA solo mejora redacción.</p>
+    </section>
+
+    <section id="config-ia" class="oculto">
+      <h2>⚙️ Configuración IA (opcional)</h2>
+      <p>Necesita internet solo aquí. Clave queda en tu navegador, nunca sale a otro servidor salvo proveedor elegido.</p>
+      <label>Proveedor
+        <select id="ia-proveedor">
+          <option value="openrouter">OpenRouter</option>
+          <option value="groq">Groq</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="nvidia">NVIDIA NIM</option>
+        </select>
+      </label>
+      <label>Modelo
+        <select id="ia-modelo"></select>
+      </label>
+      <label>Clave API
+        <input type="password" id="ia-clave" placeholder="Pega tu clave aquí" autocomplete="off">
+      </label>
+      <div class="fila">
+        <button id="btn-guardar-clave">Guardar</button>
+        <button id="btn-probar-ia" class="secundario">Probar conexión</button>
+        <button id="btn-volver-intro" class="secundario">Volver</button>
+      </div>
+      <p id="ia-estado" class="nota"></p>
+      <details>
+        <summary>¿Dónde consigo clave gratis?</summary>
+        <ul>
+          <li><strong>OpenRouter:</strong> openrouter.ai → Keys. Modelo free: <code>nvidia/nemotron-3-ultra-550b-a55b:free</code></li>
+          <li><strong>Groq:</strong> console.groq.com → API Keys. Rápido, sin tarjeta.</li>
+          <li><strong>Gemini:</strong> aistudio.google.com → Get API Key. Cuota gratuita.</li>
+          <li><strong>NVIDIA:</strong> build.nvidia.com → API Key. ~40 RPM gratis.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section id="cuestionario" class="oculto">
+      <p id="producto-tag" class="nota"></p>
+      <p id="fase-actual" class="fase"></p>
+      <h2 id="pregunta-actual"></h2>
+      <p id="pregunta-desc" class="nota"></p>
+      <div id="opciones" role="radiogroup"></div>
+      <div class="fila">
+        <button id="btn-atras" class="secundario">← Atrás</button>
+        <button id="btn-siguiente">Siguiente →</button>
+      </div>
+      <progress id="barra-progreso" value="0" max="100"></progress>
+      <p id="progreso-texto" class="nota"></p>
+    </section>
+
+    <section id="resultados" class="oculto">
+      <h2>Resultados del Diagnóstico</h2>
+      <p id="resumen-global"></p>
+      <div class="grafico-contenedor"><canvas id="radarChart" width="600" height="600"></canvas></div>
+      <div id="puntuaciones"></div>
+      <h3>🔧 Sugerencias técnicas (offline, automáticas)</h3>
+      <div id="sugerencias-locales"></div>
+      <h3>🤖 Sugerencias con IA (opcional)</h3>
+      <div class="fila">
+        <button id="btn-sugerencias">Generar con IA</button>
+        <button id="btn-config2" class="secundario">Cambiar proveedor / clave</button>
+      </div>
+      <div id="sugerencias-output">Sugerencias locales ya visibles arriba. Usa IA solo si quieres redacción ampliada.</div>
+      <div class="fila">
+        <button id="btn-exportar" class="secundario">⬇ Exportar JSON</button>
+        <button id="btn-imprimir" class="secundario">🖨 Imprimir / PDF</button>
+        <button id="btn-reiniciar" class="secundario">Reiniciar</button>
+      </div>
+    </section>
+  </main>
+  <footer><p>Rueda LIDS (Brezet &amp; van Hemel) · Uso educativo · Sin dependencias · Doble clic en index.html basta</p></footer>
+  <script src="radar.js"></script>
+  <script src="ai-suggestions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
