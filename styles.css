@@ -39,6 +39,9 @@ select,input[type=password],input[type=text],textarea{width:100%;padding:10px;ma
 .producto-box h3{margin:0 0 4px}
 #producto-tag{background:#e8f5e9;padding:6px 10px;border-radius:6px}
 .fases-lista{margin:10px 0 10px 20px}
+.help{display:inline-block;min-width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;background:#c8e6c9;color:var(--dark);font-size:13px;font-weight:700;cursor:help;position:relative;padding:0 4px;vertical-align:middle}
+.help::after{content:attr(data-tip);display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:130%;width:max-content;max-width:260px;background:#1b5e20;color:#fff;font-weight:400;font-size:13px;line-height:1.4;padding:10px 12px;border-radius:8px;z-index:10;white-space:normal;text-align:left}
+.help:hover::after,.help:focus::after{display:block}
 details{margin-top:10px;background:#f9fbe7;padding:10px;border-radius:8px}
 code{background:#eee;padding:2px 5px;border-radius:4px}
 footer{text-align:center;color:#777;font-size:13px;margin-top:16px}

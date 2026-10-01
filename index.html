@@ -13,7 +13,7 @@
   </header>
   <main>
     <section id="intro">
-      <h2>¿Qué evalúa?</h2>
+      <h2>¿Qué evalúa? <span class="help" tabindex="0" data-tip="Cómo funciona: 1) Describe tu producto abajo. 2) Responde 16 preguntas puntuando del 1 al 5. 3) Mira tu gráfico radar y las 2 prioridades. 4) Lee sugerencias offline y, si quieres, genera extras con IA.">?</span></h2>
       <p>Cuestionario guiado por fases del ciclo de vida. 16 preguntas en 8 estrategias LIDS. Resultado: gráfico radar + sugerencias técnicas.</p>
       <ol class="fases-lista">
         <li><strong>Materiales:</strong> bajo impacto + reducción uso</li>
@@ -24,7 +24,7 @@
         <li><strong>Transversal:</strong> nuevo concepto</li>
       </ol>
       <div class="producto-box">
-        <h3>📦 Tu producto</h3>
+        <h3>📦 Tu producto <span class="help" tabindex="0" data-tip="Escribe qué objeto diseñaste para que la IA dé consejos específicos y no genéricos. Nombre: ej. Diadema gaming plegable. Descripción: materiales, cómo se usa y qué pasa al final de su vida. Ej.: Estructura ABS + almohadillas poliéster, uso diario 4h, desmontable con tornillos.">?</span></h3>
         <p class="nota">Describe objeto diseñado. IA usa este contexto + puntuaciones LIDS para consejos específicos.</p>
         <label>Nombre producto
           <input type="text" id="producto-nombre" placeholder="Ej. Silla oficina modular" maxlength="80" autocomplete="off">
@@ -41,7 +41,7 @@
     </section>
 
     <section id="config-ia" class="oculto">
-      <h2>⚙️ Configuración IA (opcional)</h2>
+      <h2>⚙️ Configuración IA (opcional) <span class="help" tabindex="0" data-tip="Privacidad: tu clave se guarda solo en este navegador (no viaja a ningún servidor salvo al proveedor de IA que elijas al generar). Nunca está en el código ni se comparte. Cada persona usa su propia clave gratuita.">?</span></h2>
       <p>Necesita internet solo aquí. Clave queda en tu navegador, nunca sale a otro servidor salvo proveedor elegido.</p>
       <label>Proveedor
         <select id="ia-proveedor">
@@ -79,6 +79,7 @@
       <p id="fase-actual" class="fase"></p>
       <h2 id="pregunta-actual"></h2>
       <p id="pregunta-desc" class="nota"></p>
+      <p class="nota">Valora del 1 (nada / mínimo) al 5 (excelente) según tu producto. <span class="help" tabindex="0" data-tip="16 preguntas, 2 por cada estrategia LIDS. Sé honesto: el 1 y el 2 también son útiles porque marcan dónde mejorar. Puedes volver atrás y cambiar respuestas.">?</span></p>
       <div id="opciones" role="radiogroup"></div>
       <div class="fila">
         <button id="btn-atras" class="secundario">← Atrás</button>
@@ -95,9 +96,10 @@
       <div id="puntuaciones"></div>
       <h3>🔧 Sugerencias técnicas (offline, automáticas)</h3>
       <div id="sugerencias-locales"></div>
-      <h3>🤖 Sugerencias con IA (opcional)</h3>
+      <h3>🤖 Sugerencias con IA (opcional) <span class="help" tabindex="0" data-tip="Si el primer resultado sale pobre o incompleto (pocos bullets, una sola dimensión), pulsa Regenerar: lo intenta de nuevo, a veces con otro modelo de respaldo, hasta dar 2 dimensiones con 3 consejos cada una.">?</span></h3>
       <div class="fila">
         <button id="btn-sugerencias">Generar con IA</button>
+        <button id="btn-regenerar" class="secundario">↻ Regenerar</button>
         <button id="btn-config2" class="secundario">Cambiar proveedor / clave</button>
       </div>
       <div id="sugerencias-output">Sugerencias locales ya visibles arriba. Usa IA solo si quieres redacción ampliada.</div>

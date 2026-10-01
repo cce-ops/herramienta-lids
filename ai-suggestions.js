@@ -226,8 +226,9 @@ async function fetchModelosDisponibles(provider, key) {
 function respuestaValida(t) {
   if (!t) return false;
   const txt = t.trim();
-  if (txt.length < 150) return false;
-  if (!/[•\-\*]/.test(txt) && !/\d+[.)]\s+\S/.test(txt)) return false;
+  if (txt.length < 300) return false;
+  const bullets = (txt.match(/^[•\-\*]/gm) || []).length + (txt.match(/^\d+[.)]\s+\S/gm) || []).length;
+  if (bullets < 3) return false;
   return true;
 }
 

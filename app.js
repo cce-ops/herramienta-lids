@@ -148,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-siguiente').addEventListener('click', siguiente);
   document.getElementById('btn-atras').addEventListener('click', atras);
   document.getElementById('btn-sugerencias').addEventListener('click', generarSugerenciasIA);
+  document.getElementById('btn-regenerar').addEventListener('click', generarSugerenciasIA);
   document.getElementById('btn-exportar').addEventListener('click', exportar);
   document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
   document.getElementById('btn-reiniciar').addEventListener('click', () => location.reload());
