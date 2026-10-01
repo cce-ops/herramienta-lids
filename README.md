@@ -6,6 +6,7 @@ Aplicación web estática y gratuita para evaluar un producto con la metodologí
 
 - **En local:** descarga el repositorio y abre `index.html` con doble clic. No requiere instalación ni servidor.
 - **En la web:** activa GitHub Pages (Settings → Pages → Deploy from branch → `main` / root) y comparte la URL generada.
+  https://cce-ops.github.io/herramienta-lids/
 
 ## Qué incluye
 
