@@ -29,22 +29,38 @@ function mapaPreguntasPorDim() {
 }
 
 const PREGUNTAS = [
-  { dim: 'materiales_bajo_impacto', texto: '¿Usa materiales reciclados, renovables o certificados bajo impacto?', desc: 'Ej. rPET, madera FSC, acero reciclado. 1=nada virgen tóxico, 5=mayoría certificada.' },
-  { dim: 'materiales_bajo_impacto', texto: '¿Evita tóxicos y materiales críticos escasos?', desc: 'SVHC, halogenados, cobalto crítico, PVC. 1=sin control, 5=inventario completo + sustitución.' },
-  { dim: 'reduccion_material', texto: '¿Producto aligerado al mínimo necesario?', desc: 'Espesores, nervaduras, piezas multifunción. 1=sobredimensionado, 5=optimizado topológico.' },
-  { dim: 'reduccion_material', texto: '¿Minimiza embalaje y material auxiliar?', desc: 'Flat-pack, granel, sin EPS. 1=doble embalaje, 5=mono-material mínimo.' },
-  { dim: 'produccion_limpia', texto: '¿Proceso productivo eficiente y limpio?', desc: 'Bajo consumo, poco scrap, sin disolventes. 1=alto residuo, 5=circuito cerrado.' },
-  { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental?', desc: 'Energía renovable, ISO 14001, proximidad. 1=sin criterio, 5=auditoría + local.' },
-  { dim: 'distribucion', texto: '¿Logística optimizada en volumen y distancia?', desc: 'Apilable, carga completa, tramo corto. 1=aire + vacío, 5=densidad máxima terrestre.' },
-  { dim: 'distribucion', texto: '¿Embalaje reutilizable / reciclable?', desc: 'Mono-material, retornable. 1=mixto no reciclable, 5=retornable documentado.' },
-  { dim: 'impacto_uso', texto: '¿Bajo consumo energía / agua durante uso?', desc: 'Modo eco, clase A, sin consumibles. 1=alto consumo continuo, 5=casi cero + indicador.' },
-  { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente?', desc: 'Manual, auto-apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.' },
-  { dim: 'vida_util', texto: '¿Durable y reparable?', desc: 'Tornillos estándar, repuestos 10 años. 1=pegado desechable, 5=kit reparación + garantía 5a.' },
-  { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas estándar?', desc: 'Filtros lavables, desgaste sustituible. 1=sellado, 5=usuario repara en 10 min.' },
-  { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas?', desc: 'Clips, 3 materiales máx, marcado ISO. 1=>15 min / especial, 5=<3 min reversibles.' },
-  { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida?', desc: 'Take-back, reacondicionado, gestor. 1=vertedero, 5=canal activo + etiqueta.' },
-  { dim: 'nuevo_concepto', texto: '¿Modelo innovador desmaterializa función?', desc: 'Alquiler, refill, modular, digital. 1=venta lineal, 5=servicio probado.' },
-  { dim: 'nuevo_concepto', texto: '¿Aporta beneficio social / sistémico claro?', desc: 'Acceso compartido, empleo local reparación. 1=ninguno, 5=medido y comunicado.' }
+  { dim: 'materiales_bajo_impacto', texto: '¿Usa materiales reciclados, renovables o certificados bajo impacto?', desc: 'Ej. rPET, madera FSC, acero reciclado. 1=nada virgen tóxico, 5=mayoría certificada.',
+    ayuda: 'Mira tu lista de materiales: qué % es reciclado, renovable o certificado. 1 = todo virgen sin certificar. 5 = mayoría con certificado (FSC, GRS, rPET). Ej.: carcasa con 80% rPET = 4 o 5.' },
+  { dim: 'materiales_bajo_impacto', texto: '¿Evita tóxicos y materiales críticos escasos?', desc: 'SVHC, halogenados, cobalto crítico, PVC. 1=sin control, 5=inventario completo + sustitución.',
+    ayuda: 'Revisa fichas de seguridad (FDS) y cada pieza: PVC, retardantes halogenados, plomo, sustancias SVHC. 1 = no sabes qué contiene. 5 = inventario completo y ya sustituiste lo peor.' },
+  { dim: 'reduccion_material', texto: '¿Producto aligerado al mínimo necesario?', desc: 'Espesores, nervaduras, piezas multifunción. 1=sobredimensionado, 5=optimizado topológico.',
+    ayuda: '¿Pesa lo mínimo sin romperse ni perder función? 1 = macizo o sobredimensionado por si acaso. 5 = nervaduras, espesores ajustados o diseño optimizado. Compara con una alternativa ligera.' },
+  { dim: 'reduccion_material', texto: '¿Minimiza embalaje y material auxiliar?', desc: 'Flat-pack, granel, sin EPS. 1=doble embalaje, 5=mono-material mínimo.',
+    ayuda: 'Cuenta todo lo que acompaña al producto: cajas, espumas, film, bridas. 1 = doble caja con espuma. 5 = encaja sin relleno y en un solo material reciclable.' },
+  { dim: 'produccion_limpia', texto: '¿Proceso productivo eficiente y limpio?', desc: 'Bajo consumo, poco scrap, sin disolventes. 1=alto residuo, 5=circuito cerrado.',
+    ayuda: 'Piensa por unidad fabricada: energía, agua, recortes (scrap) y disolventes. 1 = mucho residuo y olor a disolvente. 5 = mermas por debajo del 3% reutilizadas, base agua, circuito cerrado.' },
+  { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental?', desc: 'Energía renovable, ISO 14001, proximidad. 1=sin criterio, 5=auditoría + local.',
+    ayuda: '¿De dónde viene cada parte y con qué energía se fabrica? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con ISO 14001 y energía renovable demostrable.' },
+  { dim: 'distribucion', texto: '¿Logística optimizada en volumen y distancia?', desc: 'Apilable, carga completa, tramo corto. 1=aire + vacío, 5=densidad máxima terrestre.',
+    ayuda: 'Mira camión o contenedor: ¿viaja lleno? ¿cuántos km? 1 = medio vacío o por avión. 5 = apilable, carga completa y tramo corto por tierra o mar.' },
+  { dim: 'distribucion', texto: '¿Embalaje reutilizable / reciclable?', desc: 'Mono-material, retornable. 1=mixto no reciclable, 5=retornable documentado.',
+    ayuda: '¿El envase vuelve o se recicla fácil? 1 = mezcla inseparable que acaba en basura. 5 = retornable con recogida o de un solo material con reciclaje claro.' },
+  { dim: 'impacto_uso', texto: '¿Bajo consumo energía / agua durante uso?', desc: 'Modo eco, clase A, sin consumibles. 1=alto consumo continuo, 5=casi cero + indicador.',
+    ayuda: 'Mide lo que gasta en un uso típico (kWh, agua, consumibles). 1 = siempre encendido y gasta mucho. 5 = modo eco, apagado automático y consumo casi cero con indicador visible.' },
+  { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente?', desc: 'Manual, auto-apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.',
+    ayuda: '¿El diseño evita que se use mal? 1 = sin manual ni avisos. 5 = guía clara, apagado auto y mantenimiento tan obvio que no hay que explicarlo.' },
+  { dim: 'vida_util', texto: '¿Durable y reparable?', desc: 'Tornillos estándar, repuestos 10 años. 1=pegado desechable, 5=kit reparación + garantía 5a.',
+    ayuda: '¿Se rompe pronto? ¿Se puede abrir? 1 = pegado y sin repuestos, de usar y tirar. 5 = tornillos estándar, repuestos 10 años y kit o garantía de reparación.' },
+  { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas estándar?', desc: 'Filtros lavables, desgaste sustituible. 1=sellado, 5=usuario repara en 10 min.',
+    ayuda: '¿Lo mantiene el usuario sin taller? 1 = sellado, solo servicio oficial. 5 = filtros lavables y piezas de desgaste cambiables en 10 minutos con guía.' },
+  { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas?', desc: 'Clips, 3 materiales máx, marcado ISO. 1=>15 min / especial, 5=<3 min reversibles.',
+    ayuda: 'Cronometra abrirlo con un destornillador normal. 1 = más de 15 min, herramienta especial o se rompe. 5 = menos de 3 min con clips o tornillos y plásticos marcados para reciclar.' },
+  { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida?', desc: 'Take-back, reacondicionado, gestor. 1=vertedero, 5=canal activo + etiqueta.',
+    ayuda: '¿Qué pasa cuando muere el producto? 1 = a la basura sin más. 5 = lo recoges, se reacondiciona o indicas en la etiqueta el gestor autorizado.' },
+  { dim: 'nuevo_concepto', texto: '¿Modelo innovador desmaterializa función?', desc: 'Alquiler, refill, modular, digital. 1=venta lineal, 5=servicio probado.',
+    ayuda: '¿Vendes el objeto o la función que cumple? 1 = venta lineal de usar y tirar. 5 = alquiler, recarga (refill), módulos ampliables o versión digital ya funcionando.' },
+  { dim: 'nuevo_concepto', texto: '¿Aporta beneficio social / sistémico claro?', desc: 'Acceso compartido, empleo local reparación. 1=ninguno, 5=medido y comunicado.',
+    ayuda: '¿A quién beneficia además del comprador? 1 = nada medido. 5 = uso compartido, reparación local u otro impacto medido y comunicado al usuario.' }
 ];
 
 const OPCIONES = [
@@ -87,6 +103,7 @@ function mostrarPregunta() {
   document.getElementById('fase-actual').textContent = 'Fase: ' + dim.fase + ' · ' + dim.nombre;
   document.getElementById('pregunta-actual').textContent = (indice + 1) + '/' + PREGUNTAS.length + '. ' + p.texto;
   document.getElementById('pregunta-desc').textContent = p.desc;
+  document.getElementById('pregunta-help').setAttribute('data-tip', p.ayuda || 'Valora del 1 al 5 según tu producto.');
   const box = document.getElementById('opciones');
   box.innerHTML = '';
   const actual = respuestas[indice];
