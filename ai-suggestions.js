@@ -160,7 +160,7 @@ function construirPrompt(scores, dimensiones) {
     '• Otra acción (igual, con aclaración)\n' +
     '• Tercera acción (igual)\n' +
     'Repite para las 2 puntuaciones más bajas.\n' +
-    'REGLAS: solo bullet points •, nunca párrafos largos ni lista numerada densa. Cada bullet 1-2 líneas máx. Cada término técnico (ej. poliamida 6.6, torque, in-situ, UNE-EN 1335) lleva explicación corta entre paréntesis. Prohibido usar **negrita markdown**. Español sencillo, máximo 180 palabras.';
+    'REGLAS: solo bullet points •, nunca párrafos largos ni lista numerada densa. Cada bullet 1-2 líneas máx. Cada término técnico (ej. poliamida 6.6, torque, in-situ, UNE-EN 1335) lleva explicación corta entre paréntesis. Prohibido usar **negrita markdown**. Todo en español, ni una palabra en inglés. Frases completas, prohibido cortar texto a medias. Cubre las 2 dimensiones (6 bullets en total). Máximo 180 palabras.';
 }
 
 function renderIA(texto) {
@@ -207,6 +207,30 @@ function redError(orig) {
   return e;
 }
 
+async function fetchModelosDisponibles(provider, key) {
+  try {
+    if (PROVEEDORES[provider].tipo === 'gemini') {
+      const r = await fetchTimeout(PROVEEDORES[provider].url + 'models?pageSize=100&key=' + encodeURIComponent(key), {}, 20000);
+      if (!r.ok) return null;
+      const data = await r.json();
+      return (data.models || []).map(m => String(m.name || '').replace(/^models\//, '')).filter(Boolean);
+    }
+    const base = PROVEEDORES[provider].url.replace(/\/chat\/completions\/?$/, '');
+    const r = await fetchTimeout(base + '/models', { headers: { 'Authorization': 'Bearer ' + key } }, 20000);
+    if (!r.ok) return null;
+    const data = await r.json();
+    return (data.data || []).map(m => m.id).filter(Boolean);
+  } catch (e) { return null; }
+}
+
+function respuestaValida(t) {
+  if (!t) return false;
+  const txt = t.trim();
+  if (txt.length < 150) return false;
+  if (!/[•\-\*]/.test(txt) && !/\d+[.)]\s+\S/.test(txt)) return false;
+  return true;
+}
+
 async function llamarModelo(provider, model, prompt, key) {
   const cfg = PROVEEDORES[provider];
   let r;
@@ -216,7 +240,7 @@ async function llamarModelo(provider, model, prompt, key) {
       r = await fetchTimeout(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 600 } })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 1000 } })
       });
     } catch (e) { throw redError(e); }
     if (!r.ok) throw httpError(r.status, parseInt(r.headers.get('retry-after') || '0', 10) || 0);
@@ -234,7 +258,7 @@ async function llamarModelo(provider, model, prompt, key) {
         'HTTP-Referer': window.location.href,
         'X-Title': 'Diagnostico LIDS'
       },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 600 })
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 1000 })
     });
   } catch (e) { throw redError(e); }
   if (!r.ok) throw httpError(r.status, parseInt(r.headers.get('retry-after') || '0', 10) || 0);
@@ -258,8 +282,21 @@ async function generarSugerenciasIA() {
   const dims = window.__lastDims || [];
   const prodCtx = getProductoContext();
   const prompt = construirPrompt(scores, dims);
-  const lista = [sel].concat(cfg.modelos.filter(m => m !== sel));
+  const base = [sel].concat(cfg.modelos.filter(m => m !== sel));
   const intentos = [];
+  progreso('🔍 Consultando modelos disponibles en tu cuenta de ' + esc(cfg.label) + '...');
+  const disp = await fetchModelosDisponibles(provider, key);
+  let lista = base;
+  if (disp) {
+    lista = base.filter(m => disp.indexOf(m) !== -1);
+    if (!lista.length) {
+      out.innerHTML = '<p>❌ Ningún modelo de la lista existe en tu cuenta de ' + esc(cfg.label) + '.</p>' +
+        '<p class="nota">Tu cuenta ofrece: ' + esc(disp.slice(0, 12).join(', ')) + (disp.length > 12 ? '... (+' + (disp.length - 12) + ')' : '') + '</p>' +
+        '<p>Actualiza la lista de modelos o usa otro proveedor. Resultados intactos.</p>';
+      return;
+    }
+    if (lista[0] !== sel) intentos.push('⚠ ' + esc(sel) + ' no existe en tu cuenta, empiezo por ' + esc(lista[0]));
+  }
 
   function progreso(msg) {
     out.innerHTML = '<p>' + msg + '</p>' + (intentos.length ? '<p class="nota">' + intentos.join('<br>') + '</p>' : '');
@@ -271,6 +308,10 @@ async function generarSugerenciasIA() {
       progreso('⏳ Probando <strong>' + esc(m) + '</strong> (' + (i + 1) + '/' + lista.length + ', intento ' + att + '/2)...' + (prodCtx.nombre ? ' Producto: ' + esc(prodCtx.nombre) : ''));
       try {
         const texto = await llamarModelo(provider, m, prompt, key);
+        if (!respuestaValida(texto)) {
+          intentos.push('✕ ' + esc(m) + ': respuesta pobre o cortada (' + texto.trim().length + ' caracteres, sin bullets completos) → siguiente modelo');
+          break;
+        }
         out.innerHTML = renderIA(texto) + '<p class="nota">✓ Generado con ' + esc(provider) + ' / ' + esc(m) + ((att > 1 || i > 0) ? ' (tras reintento / modelo respaldo)' : '') + '</p>';
         return;
       } catch (e) {
