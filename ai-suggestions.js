@@ -66,7 +66,7 @@ const PROVEEDORES = {
   gemini: {
     label: 'Google Gemini',
     url: 'https://generativelanguage.googleapis.com/v1beta/models/',
-    modelos: ['gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.7-flash', 'gemini-3.5-flash'],
+    modelos: ['gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'],
     tipo: 'gemini'
   }
 };
@@ -109,7 +109,7 @@ function initIAConfig() {
   });
   document.getElementById('btn-probar-ia').addEventListener('click', probarConexionIA);
   document.getElementById('btn-volver-intro').addEventListener('click', () => {
-    mostrarSeccion('intro');
+    mostrarSeccion(window.__lastScores ? 'resultados' : 'intro');
   });
 }
 
@@ -182,54 +182,117 @@ function renderIA(texto) {
   return html;
 }
 
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function esperar(ms) { return new Promise(res => setTimeout(res, ms)); }
+
+async function fetchTimeout(url, opts, ms) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms || 60000);
+  try { return await fetch(url, Object.assign({}, opts, { signal: ctrl.signal })); }
+  finally { clearTimeout(t); }
+}
+
+function httpError(status, retryAfter) {
+  const e = new Error('HTTP ' + status);
+  e.code = status;
+  e.retryAfter = retryAfter || 0;
+  e.retryable = status === 429 || (status >= 500 && status <= 599);
+  return e;
+}
+
+function redError(orig) {
+  const e = new Error(orig && orig.name === 'AbortError' ? 'Timeout 60s sin respuesta' : 'Fallo red: ' + (orig ? orig.message : 'desconocido'));
+  e.retryable = true;
+  return e;
+}
+
+async function llamarModelo(provider, model, prompt, key) {
+  const cfg = PROVEEDORES[provider];
+  let r;
+  if (cfg.tipo === 'gemini') {
+    const url = cfg.url + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
+    try {
+      r = await fetchTimeout(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 600 } })
+      });
+    } catch (e) { throw redError(e); }
+    if (!r.ok) throw httpError(r.status, parseInt(r.headers.get('retry-after') || '0', 10) || 0);
+    const data = await r.json();
+    const t = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts.map(p => p.text || '').join('');
+    if (!t) { const e = new Error('Respuesta vacía del modelo'); e.retryable = true; throw e; }
+    return t;
+  }
+  try {
+    r = await fetchTimeout(cfg.url, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + key,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'Diagnostico LIDS'
+      },
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 600 })
+    });
+  } catch (e) { throw redError(e); }
+  if (!r.ok) throw httpError(r.status, parseInt(r.headers.get('retry-after') || '0', 10) || 0);
+  const data = await r.json();
+  const t = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (!t) { const e = new Error('Respuesta vacía del modelo'); e.retryable = true; throw e; }
+  return t;
+}
+
 async function generarSugerenciasIA() {
   const out = document.getElementById('sugerencias-output');
   const provider = localStorage.getItem('lids_provider') || document.getElementById('ia-proveedor').value || 'openrouter';
-  const model = localStorage.getItem('lids_model_' + provider) || PROVEEDORES[provider].modelos[0];
+  const cfg = PROVEEDORES[provider];
+  const sel = localStorage.getItem('lids_model_' + provider) || cfg.modelos[0];
   const key = getKey(provider);
   if (!key) {
-    out.textContent = '⚠️ Sin clave API para ' + provider + '. Configura en ⚙️ Configurar IA. Mientras tanto usa sugerencias locales de arriba (offline).';
-    mostrarSeccion('config-ia');
+    out.innerHTML = '<p>⚠️ Sin clave API para ' + esc(provider) + '. Pulsa «Cambiar proveedor / clave», pégala y vuelve aquí con «Volver»: tus resultados y puntuaciones quedan intactos.</p>';
     return;
   }
   const scores = window.__lastScores || {};
   const dims = window.__lastDims || [];
   const prodCtx = getProductoContext();
   const prompt = construirPrompt(scores, dims);
-  out.textContent = '⏳ Analizando ' + (prodCtx.nombre ? '"' + prodCtx.nombre + '" ' : '') + 'con ' + provider + ' / ' + model + '...';
+  const lista = [sel].concat(cfg.modelos.filter(m => m !== sel));
+  const intentos = [];
 
-  try {
-    let texto;
-    if (PROVEEDORES[provider].tipo === 'gemini') {
-      const url = PROVEEDORES[provider].url + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 600 } })
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = await r.json();
-      texto = data.candidates && data.candidates[0] && data.candidates[0].content.parts.map(p => p.text).join('');
-    } else {
-      const r = await fetch(PROVEEDORES[provider].url, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + key,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'Diagnostico LIDS'
-        },
-        body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 600 })
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = await r.json();
-      texto = data.choices[0].message.content;
-    }
-    out.innerHTML = renderIA(texto || 'Respuesta vacía del modelo.');
-  } catch (e) {
-    console.error(e);
-    out.textContent = '❌ Fallo IA (' + e.message + '). Verifica clave, modelo y conexión. Sugerencias locales siguen válidas arriba.';
+  function progreso(msg) {
+    out.innerHTML = '<p>' + msg + '</p>' + (intentos.length ? '<p class="nota">' + intentos.join('<br>') + '</p>' : '');
   }
+
+  for (let i = 0; i < lista.length; i++) {
+    const m = lista[i];
+    for (let att = 1; att <= 2; att++) {
+      progreso('⏳ Probando <strong>' + esc(m) + '</strong> (' + (i + 1) + '/' + lista.length + ', intento ' + att + '/2)...' + (prodCtx.nombre ? ' Producto: ' + esc(prodCtx.nombre) : ''));
+      try {
+        const texto = await llamarModelo(provider, m, prompt, key);
+        out.innerHTML = renderIA(texto) + '<p class="nota">✓ Generado con ' + esc(provider) + ' / ' + esc(m) + ((att > 1 || i > 0) ? ' (tras reintento / modelo respaldo)' : '') + '</p>';
+        return;
+      } catch (e) {
+        if (e.code === 401 || e.code === 403) {
+          out.innerHTML = '<p>❌ Clave API rechazada por ' + esc(cfg.label) + ' (HTTP ' + e.code + '). Revisa clave en «Cambiar proveedor / clave». Resultados intactos, nada que repetir.</p>';
+          return;
+        }
+        if (e.retryable && att === 1) {
+          const s = e.code === 429 ? Math.min(Math.max(e.retryAfter || 4, 2), 30) : 3;
+          intentos.push('↻ ' + esc(m) + ': fallo ' + (e.code ? 'HTTP ' + e.code : esc(e.message)) + ' → reintento en ' + s + 's...');
+          progreso('⏳ ' + esc(m) + ' falló (' + (e.code ? 'HTTP ' + e.code : 'red') + '). Reintento en ' + s + 's...');
+          await esperar(s * 1000);
+        } else {
+          intentos.push('✕ ' + esc(m) + ': ' + (e.code ? 'HTTP ' + e.code + ' ' : '') + esc(e.message) + (e.code === 404 ? ' (modelo no disponible, paso al siguiente)' : ''));
+          break;
+        }
+      }
+    }
+  }
+  out.innerHTML = '<p>❌ Fallaron los ' + lista.length + ' modelos de ' + esc(cfg.label) + '.</p>' +
+    '<p class="nota">' + intentos.join('<br>') + '</p>' +
+    '<p>Sugerencias locales de arriba siguen válidas. Verifica conexión o prueba otro proveedor. Resultados intactos.</p>';
 }
 
 async function probarConexionIA() {
