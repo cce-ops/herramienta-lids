@@ -20,14 +20,11 @@ Aplicación web estática y gratuita para evaluar un producto con la metodologí
 
 ## Configuración de la IA (opcional)
 
-En la pantalla de configuración se elige proveedor y modelo, y se pega la clave personal. La clave se guarda únicamente en el `localStorage` del navegador de cada usuario; nunca se incluye en el código ni se sube al repositorio.
+En la pantalla de configuración se elige modelo y se pega la clave personal. La clave se guarda únicamente en el `localStorage` del navegador de cada usuario; nunca se incluye en el código ni se sube al repositorio.
 
-Proveedores soportados (modelos gratuitos):
+Proveedor soportado (modelos gratuitos):
 
-- **OpenRouter:** `nvidia/nemotron-3-ultra-550b-a55b:free`, `stealth/space-bunny-alpha`
-- **Groq:** `openai/gpt-oss-120b`, `openai/gpt-oss-20b`
-- **Google Gemini:** `gemini-3.8-flash`, entre otros
-- **NVIDIA NIM:** `nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nemotron-4-340b-instruct`
+- **Google Gemini:** `gemini-3.8-flash`, `gemini-3.8-live`, `gemini-3.8-live-extended-thinking`, `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`
 
 ## Estructura
 
@@ -37,7 +34,7 @@ Proveedores soportados (modelos gratuitos):
 | `styles.css`        | Estilos responsive y de impresión                       |
 | `app.js`            | Cuestionario, puntuaciones, contexto de producto        |
 | `radar.js`          | Gráfico radar nativo y tarjetas de puntuación           |
-| `ai-suggestions.js` | Sugerencias locales + conexión multi-proveedor de IA    |
+| `ai-suggestions.js` | Sugerencias locales + conexión con IA (Gemini)           |
 
 ## Privacidad
 

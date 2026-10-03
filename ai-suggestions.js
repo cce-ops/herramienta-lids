@@ -1,4 +1,4 @@
-/* ai-suggestions.js - Sugerencias locales offline + IA multi-proveedor opcional */
+/* ai-suggestions.js - Sugerencias locales offline + IA opcional (Google Gemini) */
 'use strict';
 
 const SUGERENCIAS_LOCALES = {
@@ -45,34 +45,37 @@ const SUGERENCIAS_LOCALES = {
 };
 
 const PROVEEDORES = {
-  openrouter: {
-    label: 'OpenRouter',
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    modelos: ['nvidia/nemotron-3-ultra-550b-a55b:free', 'stealth/space-bunny-alpha'],
-    tipo: 'openai'
-  },
-  groq: {
-    label: 'Groq',
-    url: 'https://api.groq.com/openai/v1/chat/completions',
-    modelos: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'],
-    tipo: 'openai'
-  },
-  nvidia: {
-    label: 'NVIDIA NIM',
-    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
-    modelos: ['nvidia/nemotron-3-ultra-550b-a55b', 'nvidia/nemotron-4-340b-instruct'],
-    tipo: 'openai'
-  },
   gemini: {
     label: 'Google Gemini',
     url: 'https://generativelanguage.googleapis.com/v1beta/models/',
-    modelos: ['gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'],
-    tipo: 'gemini'
+    modelos: ['gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
   }
 };
 
+const PROVEEDOR_POR_DEFECTO = 'gemini';
+const PREFIJO_CLAVE = 'lids_apikey_';
+const PREFIJO_MODELO = 'lids_model_';
+
+/* Proveedor guardado que ya no existe (OpenRouter, Groq, NVIDIA NIM...): cae a Gemini. */
+function proveedorValido(p) {
+  return Object.prototype.hasOwnProperty.call(PROVEEDORES, p) ? p : PROVEEDOR_POR_DEFECTO;
+}
+
 function getKey(provider) {
-  return localStorage.getItem('lids_apikey_' + provider) || '';
+  return localStorage.getItem(PREFIJO_CLAVE + provider) || '';
+}
+
+/* Borra claves y modelos guardados de los proveedores retirados: ya no sirven para nada. */
+function limpiarProveedoresRetirados() {
+  try {
+    const p = localStorage.getItem('lids_provider');
+    if (p && !PROVEEDORES[p]) localStorage.removeItem('lids_provider');
+    [PREFIJO_CLAVE, PREFIJO_MODELO].forEach(pref => {
+      Object.keys(localStorage)
+        .filter(k => k.indexOf(pref) === 0 && !PROVEEDORES[k.slice(pref.length)])
+        .forEach(k => localStorage.removeItem(k));
+    });
+  } catch (e) {}
 }
 
 function initIAConfig() {
@@ -80,11 +83,12 @@ function initIAConfig() {
   const selMod = document.getElementById('ia-modelo');
   const inpKey = document.getElementById('ia-clave');
   if (!selProv) return;
-  const savedProv = localStorage.getItem('lids_provider') || 'openrouter';
-  selProv.value = savedProv;
+  limpiarProveedoresRetirados();
+  selProv.value = proveedorValido(localStorage.getItem('lids_provider'));
 
   function refrescar() {
-    const p = selProv.value;
+    const p = proveedorValido(selProv.value);
+    selProv.value = p;
     const cfg = PROVEEDORES[p];
     selMod.innerHTML = '';
     cfg.modelos.forEach(m => {
@@ -92,7 +96,7 @@ function initIAConfig() {
       o.value = m; o.textContent = m;
       selMod.appendChild(o);
     });
-    const savedMod = localStorage.getItem('lids_model_' + p);
+    const savedMod = localStorage.getItem(PREFIJO_MODELO + p);
     if (savedMod && cfg.modelos.includes(savedMod)) selMod.value = savedMod;
     inpKey.value = getKey(p);
     setEstado('Proveedor: ' + cfg.label + '. ' + (getKey(p) ? 'Clave guardada ✓' : 'Sin clave: solo sugerencias locales.'));
@@ -101,10 +105,10 @@ function initIAConfig() {
   refrescar();
 
   document.getElementById('btn-guardar-clave').addEventListener('click', () => {
-    const p = selProv.value;
+    const p = proveedorValido(selProv.value);
     localStorage.setItem('lids_provider', p);
-    localStorage.setItem('lids_model_' + p, selMod.value);
-    localStorage.setItem('lids_apikey_' + p, inpKey.value.trim());
+    localStorage.setItem(PREFIJO_MODELO + p, selMod.value);
+    localStorage.setItem(PREFIJO_CLAVE + p, inpKey.value.trim());
     setEstado(inpKey.value.trim() ? 'Clave guardada local ✓' : 'Clave borrada. Modo offline.');
   });
   document.getElementById('btn-probar-ia').addEventListener('click', probarConexionIA);
@@ -209,17 +213,10 @@ function redError(orig) {
 
 async function fetchModelosDisponibles(provider, key) {
   try {
-    if (PROVEEDORES[provider].tipo === 'gemini') {
-      const r = await fetchTimeout(PROVEEDORES[provider].url + 'models?pageSize=100&key=' + encodeURIComponent(key), {}, 20000);
-      if (!r.ok) return null;
-      const data = await r.json();
-      return (data.models || []).map(m => String(m.name || '').replace(/^models\//, '')).filter(Boolean);
-    }
-    const base = PROVEEDORES[provider].url.replace(/\/chat\/completions\/?$/, '');
-    const r = await fetchTimeout(base + '/models', { headers: { 'Authorization': 'Bearer ' + key } }, 20000);
+    const r = await fetchTimeout(PROVEEDORES[provider].url + 'models?pageSize=100&key=' + encodeURIComponent(key), {}, 20000);
     if (!r.ok) return null;
     const data = await r.json();
-    return (data.data || []).map(m => m.id).filter(Boolean);
+    return (data.models || []).map(m => String(m.name || '').replace(/^models\//, '')).filter(Boolean);
   } catch (e) { return null; }
 }
 
@@ -234,49 +231,30 @@ function respuestaValida(t) {
 
 async function llamarModelo(provider, model, prompt, key) {
   const cfg = PROVEEDORES[provider];
+  const url = cfg.url + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
   let r;
-  if (cfg.tipo === 'gemini') {
-    const url = cfg.url + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
-    try {
-      r = await fetchTimeout(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 1000 } })
-      });
-    } catch (e) { throw redError(e); }
-    if (!r.ok) throw httpError(r.status, parseInt(r.headers.get('retry-after') || '0', 10) || 0);
-    const data = await r.json();
-    const t = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts.map(p => p.text || '').join('');
-    if (!t) { const e = new Error('Respuesta vacía del modelo'); e.retryable = true; throw e; }
-    return t;
-  }
   try {
-    r = await fetchTimeout(cfg.url, {
+    r = await fetchTimeout(url, {
       method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + key,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': window.location.href,
-        'X-Title': 'Diagnostico LIDS'
-      },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 1000 })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 1000 } })
     });
   } catch (e) { throw redError(e); }
   if (!r.ok) throw httpError(r.status, parseInt(r.headers.get('retry-after') || '0', 10) || 0);
   const data = await r.json();
-  const t = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  const t = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts.map(p => p.text || '').join('');
   if (!t) { const e = new Error('Respuesta vacía del modelo'); e.retryable = true; throw e; }
   return t;
 }
 
 async function generarSugerenciasIA() {
   const out = document.getElementById('sugerencias-output');
-  const provider = localStorage.getItem('lids_provider') || document.getElementById('ia-proveedor').value || 'openrouter';
+  const provider = proveedorValido(localStorage.getItem('lids_provider') || document.getElementById('ia-proveedor').value);
   const cfg = PROVEEDORES[provider];
-  const sel = localStorage.getItem('lids_model_' + provider) || cfg.modelos[0];
+  const sel = localStorage.getItem(PREFIJO_MODELO + provider) || cfg.modelos[0];
   const key = getKey(provider);
   if (!key) {
-    out.innerHTML = '<p>⚠️ Sin clave API para ' + esc(provider) + '. Pulsa «Cambiar proveedor / clave», pégala y vuelve aquí con «Volver»: tus resultados y puntuaciones quedan intactos.</p>';
+    out.innerHTML = '<p>⚠️ Sin clave API para ' + esc(cfg.label) + '. Pulsa «Cambiar proveedor / clave», pégala y vuelve aquí con «Volver»: tus resultados y puntuaciones quedan intactos.</p>';
     return;
   }
   const scores = window.__lastScores || {};
@@ -293,7 +271,7 @@ async function generarSugerenciasIA() {
     if (!lista.length) {
       out.innerHTML = '<p>❌ Ningún modelo de la lista existe en tu cuenta de ' + esc(cfg.label) + '.</p>' +
         '<p class="nota">Tu cuenta ofrece: ' + esc(disp.slice(0, 12).join(', ')) + (disp.length > 12 ? '... (+' + (disp.length - 12) + ')' : '') + '</p>' +
-        '<p>Actualiza la lista de modelos o usa otro proveedor. Resultados intactos.</p>';
+        '<p>Actualiza la lista de modelos. Resultados intactos.</p>';
       return;
     }
     if (lista[0] !== sel) intentos.push('⚠ ' + esc(sel) + ' no existe en tu cuenta, empiezo por ' + esc(lista[0]));
@@ -334,33 +312,22 @@ async function generarSugerenciasIA() {
   }
   out.innerHTML = '<p>❌ Fallaron los ' + lista.length + ' modelos de ' + esc(cfg.label) + '.</p>' +
     '<p class="nota">' + intentos.join('<br>') + '</p>' +
-    '<p>Sugerencias locales de arriba siguen válidas. Verifica conexión o prueba otro proveedor. Resultados intactos.</p>';
+    '<p>Sugerencias locales de arriba siguen válidas. Verifica la conexión o revisa tu clave. Resultados intactos.</p>';
 }
 
 async function probarConexionIA() {
-  const p = document.getElementById('ia-proveedor').value;
+  const p = proveedorValido(document.getElementById('ia-proveedor').value);
   const key = document.getElementById('ia-clave').value.trim();
   if (!key) { setEstado('Pega clave primero.'); return; }
-  setEstado('Probando ' + p + '...');
+  setEstado('Probando ' + PROVEEDORES[p].label + '...');
   try {
-    if (PROVEEDORES[p].tipo === 'gemini') {
-      const m = document.getElementById('ia-modelo').value;
-      const r = await fetch(PROVEEDORES[p].url + encodeURIComponent(m) + ':generateContent?key=' + encodeURIComponent(key), {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: 'Responde solo: OK' }] }] })
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      setEstado('✓ Conexión Gemini OK.');
-    } else {
-      const m = document.getElementById('ia-modelo').value;
-      const r = await fetch(PROVEEDORES[p].url, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: m, messages: [{ role: 'user', content: 'Responde solo: OK' }], max_tokens: 5 })
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      setEstado('✓ Conexión ' + p + ' OK.');
-    }
+    const m = document.getElementById('ia-modelo').value;
+    const r = await fetch(PROVEEDORES[p].url + encodeURIComponent(m) + ':generateContent?key=' + encodeURIComponent(key), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Responde solo: OK' }] }] })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    setEstado('✓ Conexión ' + PROVEEDORES[p].label + ' OK.');
   } catch (e) {
     setEstado('❌ Fallo: ' + e.message);
   }
