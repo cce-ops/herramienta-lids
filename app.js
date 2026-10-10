@@ -170,8 +170,8 @@ function actualizarFaseActual() {
   document.getElementById('fase-actual').textContent = 'Fase: ' + dim.fase + ' · ' + dim.nombre;
 }
 
-function cambiarModo(modo) {
-  modoActual = modo;
+function cambiarModo(tabBtn) {
+  modoActual = tabBtn.dataset.modo === 'servicio' ? 'servicio' : 'producto';
   // guardar preferencia en localStorage
   try { localStorage.setItem('lids_modo', modoActual); } catch (e) {}
   actualizarPanelProductoVisible(modoActual === 'producto');
@@ -278,8 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => { actualizarPanelProductoVisible(modoActual === 'producto'); }, 10);
 
   // Listeners de tabs Producto/Servicio
-  document.getElementById('tab-producto').addEventListener('click', () => cambiarModo('producto'));
-  document.getElementById('tab-servicio').addEventListener('click', () => cambiarModo('servicio'));
+  document.getElementById('tab-producto').addEventListener('click', () => cambiarModo({ dataset: { modo: 'producto' } }));
+  document.getElementById('tab-servicio').addEventListener('click', () => cambiarModo({ dataset: { modo: 'servicio' } }));
 
   // Restaurar producto/servicio guardado
   try {
