@@ -1,9 +1,8 @@
 /* app.js - Cuestionario LIDS por fases ciclo vida, 16 preguntas, offline + selector Producto/Servicio */
 'use strict';
 
+// ---------- CONFIGURATION ----------
 const DIMENSIONES = [
-  // Orden rueda LIDS clásica: 0 arriba, sentido horario 0-7 como imagen referencia
-  // terms: cada término vinculado a su pregunta (q: 0 primera, 1 segunda) para pintar según respuesta
   { id: 'nuevo_concepto', nombre: '0) Nuevo concepto', fase: 'Transversal',
     terms: [{ t: 'Desmaterialización', q: 0 }, { t: 'Uso compartido', q: 1 }, { t: 'Integración funciones', q: 0 }, { t: 'De producto a servicio', q: 0 }] },
   { id: 'materiales_bajo_impacto', nombre: '1) Materiales bajo impacto', fase: 'Extracción / Materiales',
@@ -22,7 +21,7 @@ const DIMENSIONES = [
     terms: [{ t: 'Reutilización', q: 1 }, { t: 'Remanufactura', q: 1 }, { t: 'Reciclaje materiales', q: 0 }, { t: 'Incineración limpia', q: 0 }] }
 ];
 
-// Preguntas para modo Producto (mismo orden y estructura que antes)
+// Preguntas modo Producto (estructuras originales)
 const PREGUNTAS_PROD = [
   { dim: 'materiales_bajo_impacto', texto: '¿Usa materiales reciclados, renovables o certificados bajo impacto?', desc: 'Ej. rPET, madera FSC, acero reciclado. 1=nada virgen tóxico, 5=mayoría certificada.',
     ayuda: 'Mira tu lista de materiales: qué % es reciclado, renovable o certificado. 1 = todo virgen sin certificar. 5 = mayoría con certificado (FSC, GRS, rPET). Ej.: carcasa con 80% rPET = 4 o 5.' },
@@ -34,44 +33,44 @@ const PREGUNTAS_PROD = [
     ayuda: 'Cuenta todo lo que acompaña al producto: cajas, espumas, film, bridas. 1 = doble caja con espuma. 5 = encaja sin relleno y en un solo material reciclable.' },
   { dim: 'produccion_limpia', texto: '¿Proceso productivo eficiente y limpio?', desc: 'Bajo consumo, poco scrap, sin disolventes. 1=alto residuo, 5=circuito cerrado.',
     ayuda: 'Piensa por unidad fabricada: energía, agua, recortes (scrap) y disolventes. 1 = mucho residuo y olor a disolvente. 5 = mermas por debajo del 3% reutilizadas, base agua, circuito cerrado.' },
-  { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental?', desc: 'Energía renovable, ISO 14001, proximidad. 1=sin criterio, 5=auditoría + local.',
+  { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental?", desc: 'Energía renovable, ISO 14001, proximidad. 1=sin criterio, 5=auditoría + local.',
     ayuda: '¿De dónde viene cada parte y con qué energía se fabrica? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con ISO 14001 y energía renovable demostrable.' },
   { dim: 'distribucion', texto: '¿Logística optimizada en volumen y distancia?', desc: 'Apilable, carga completa, tramo corto. 1=aire + vacío, 5=densidad máxima terrestre.',
     ayuda: 'Mira camión o contenedor: ¿viaja lleno? ¿cuántos km? 1 = medio vacío o por avión. 5 = apilable, carga completa y tramo corto por tierra o mar.' },
   { dim: 'distribucion', texto: '¿Embalaje reutilizable / reciclable?', desc: 'Mono-material, retornable. 1=mixto no reciclable, 5=retornable documentado.',
     ayuda: '¿El envase vuelve o se recicla fácil? 1 = mezcla inseparable que acaba en basura. 5 = retornable con recogida o de un solo material con reciclaje claro.' },
   { dim: 'impacto_uso', texto: '¿Bajo consumo energía / agua durante uso?', desc: 'Modo eco, clase A, sin consumibles. 1=alto consumo continuo, 5=casi cero + indicador.',
-    ayuda: 'Mide lo que gasta en un uso típico (kWh, agua, consumibles). 1 = siempre encendido y gasta mucho. 5 = modo eco, apagado automático y consumo casi cero con indicador visible.' },
+    ayuda: 'Mide lo que gasta en un uso típico (kWh, agua, consumibles). 1 = siempre encendido y gasta mucho. 5 = modo eco, apagado automático y consumo casi cero visible.' },
   { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente?', desc: 'Manual, auto-apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.',
     ayuda: '¿El diseño evita que se use mal? 1 = sin manual ni avisos. 5 = guía clara, apagado auto y mantenimiento tan obvio que no hay que explicarlo.' },
   { dim: 'vida_util', texto: '¿Durable y reparable?', desc: 'Tornillos estándar, repuestos 10 años. 1=pegado desechable, 5=kit reparación + garantía 5a.',
     ayuda: '¿Se rompe pronto? ¿Se puede abrir? 1 = pegado y sin repuestos, de usar y tirar. 5 = tornillos estándar, repuestos 10 años y kit o garantía de reparación.' },
   { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas estándar?', desc: 'Filtros lavables, desgaste sustituible. 1=sellado, 5=usuario repara en 10 min.',
-    ayuda: '¿Lo mantiene el usuario sin taller? 1 = sellado, solo servicio oficial. 5 = filtros lavables y piezas de desgaste cambiables en 10 minutos con guía.' },
+    ayuda: '¿Lo mantiene el usuario sin taller? 1 = solo servicio oficial. 5 = filtros lavables y piezas de desgaste cambiables en 10 minutos con guía.' },
   { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas?', desc: 'Clips, 3 materiales máx, marcado ISO. 1=>15 min / especial, 5=<3 min reversibles.',
     ayuda: 'Cronometra abrirlo con un destornillador normal. 1 = más de 15 min, herramienta especial o se rompe. 5 = menos de 3 min con clips o tornillos y plásticos marcados para reciclar.' },
   { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida?', desc: 'Take-back, reacondicionado, gestor. 1=vertedero, 5=canal activo + etiqueta.',
-    ayuda: '¿Qué pasa cuando muere el producto? 1 = a la basura sin más. 5 = lo recoges, se reacondiciona o indicas en la etiqueta el gestor autorizado.' },
+    ayuda: '¿Qué pasa cuando muere el producto? 1 = a la basura sin más. 5 = lo recoges, se reacondiciona o indicas gestor autorizado al usuario.' },
   { dim: 'nuevo_concepto', texto: '¿Modelo innovador desmaterializa función?', desc: 'Alquiler, refill, modular, digital. 1=venta lineal, 5=servicio probado.',
     ayuda: '¿Vendes el objeto o la función que cumple? 1 = venta lineal de usar y tirar. 5 = alquiler, recarga (refill), módulos ampliables o versión digital ya funcionando.' },
   { dim: 'nuevo_concepto', texto: '¿Aporta beneficio social / sistémico claro?', desc: 'Acceso compartido, empleo local reparación. 1=ninguno, 5=medido y comunicado.',
     ayuda: '¿A quién beneficia además del comprador? 1 = nada medido. 5 = uso compartido, reparación local u otro impacto medido y comunicado al usuario.' }
 ];
 
-// Preguntas para modo Servicio (misma estructura de dimensiones pero redacción adaptada)
+// Preguntas modo Servicio (mismas dimensiones, redacción adaptada)
 const PREGUNTAS_SERV = [
   { dim: 'materiales_bajo_impacto', texto: '¿El servicio evita materiales vírgenes o críticos por uso?', desc: 'Infraestructura, hardware, licencias. 1=vírgenes sin control, 5=predominantemente renovables o reciclados.',
     ayuda: 'Revisa qué hardware/licencias se proveen. 1 = compra nueva cada vez. 5 = renovables, reciclados o reacondicionados con inventario conocido.' },
   { dim: 'materiales_bajo_impacto', texto: '¿Evita sustancias tóxicas o críticas en infraestructura?', desc: 'HVAC químico, refrigerantes, componentes con metales críticos. 1=sin inventario, 5=inventario completo + sustitución.',
     ayuda: 'Revisa componentes químicos y de hardware: refrigerantes halogenados, plomo, cobalto crítico. 1 = no sabe qué contiene. 5 = inventario completo y ya sustituyó lo peor.' },
-  { dim: 'reduccion_material', texto: '¿Infrafructura aligerada al mínimo necesario?', desc: Servidores, ancho de red, recursos asignados. 1=sobredimensionado, 5=optimizado topológico.',
+  { dim: 'reduccion_material', texto: '¿Infrafructura aligerada al mínimo necesario?', desc: Servidores, ancho de red, recursos asignados. 1=sobredimensionado, 5=optimizado topológicamente.',
     ayuda: '¿Los recursos usados son estrictamente los mínimos? 1 = sobre-provisionado por seguridad. 5 = topología eficiente, sin desperdicio de capacidad.' },
   { dim: 'reduccion_material', texto: '¿Minimiza recursos auxiliares y embalaje digital?', desc: 'Adjuntos, cache, logs, paquetes innecesarios. 1=doble embalaje, 5=mono-material mínimo.',
     ayuda: 'Cuenta todo lo adicional: logs excesivos, archivos temporales sin purgar, paquetes redundantes. 1 = generosos sin cleaning. 5 = purge automática, sin caché residual.' },
-  { dim: 'produccion_limpia', texto: '¿Procesos de puesta en marcha y operación eficientes y limpias?', desc: 'Consumo energia, proveedores, centro de datos. 1=alto residuo, 5=circuito cerrado o renovables.',
+  { dim: 'produccion_limpia', texto: '¿Procesos de puesta en marcha y operación eficientes y limpios?', desc: 'Consumo energía, proveedores, centro de datos. 1=alto residuo, 5=circuito cerrado o renovables.',
     ayuda: 'Piensa por sesión/hora: energía, agua, recortes y químicos. 1 = mucho residuo y alto consumo. 5 = base agua, eficiencia certificada, reutilización mermas.' },
   { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental demostrable?', desc: 'Energía renovable, certificaciones, proximidad. 1=sin criterio, 5=auditoría + local.',
-    ayuda: '¿De dónde viene cada infraestructura y con qué energía? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con energía verde demostrada.' },
+    ayuda: '¿De dónde viene cada parte y con qué energía? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con energía verde demostrada.' },
   { dim: 'distribucion', texto: '¿Canales de distribución optimizados en volumen y distancia?', desc: 'Descargas, CDN, delivery digital. 1=aire + vacío, 5=densidad máxima terrestre/marítima.',
     ayuda: 'Mira ancho de banda o transfers: ¿quién entrega y cuántos km/saltos? 1 = descarga por enlace lento o transfer intercontinental. 5 = CDN local o distribución P2P eficiente.' },
   { dim: 'distribucion', texto: '¿Embalaje/Retorno optimizado?', desc: 'Digital=meta-cero físicos. 1=materiales físicos innecesarios, 5=servicios retornables o take-back documentado.',
@@ -103,16 +102,17 @@ const OPCIONES = [
 ];
 
 let indice = 0;
-let respuestas = {}; // pregunta idx -> 1-5
-let modoActual = 'producto'; // 'producto' o 'servicio'
+let respuestas = {};
+let modoActual = 'producto';
 
-function dimDePregunta(i) { return DIMENSIONES.find(d => d.id === (modoActual === 'producto' ? PREGUNTAS_PROD[i].dim : PREGUNTAS_SERV[i]).id); }
-// Helper corregido:
+// Función helper: obtiene la dimensión para la pregunta actual según el modo
 function dimDePregunta(i) {
-  const p = modoActual === 'producto' ? PREGUNTAS_PROD[i] : PREGUNTAS_SERV[i];
+  const preguntas = modoActual === 'producto' ? PREGUNTAS_PROD : PREGUNTAS_SERV;
+  const p = preguntas[i];
   return DIMENSIONES.find(d => d.id === p.dim);
 }
 
+// ---------- UTILIDADES ----------
 function getProducto() {
   const n = (document.getElementById('producto-nombre').value || '').trim();
   const d = (document.getElementById('producto-desc').value || '').trim();
@@ -135,30 +135,34 @@ function saveServicio() {
   window.__servicio = getServicio();
 }
 
+// ---------- LÓGICA PRINCIPAL ----------
 function iniciar() {
-  saveProducto(); saveServicio(); // guardar ambos en caso de cambio de tab después
-  indice = 0; respuestas = {}; modoActual = 'producto'; // reset a producto por defecto
-  actualizarPanelProductoVisible(true); // asegurar visibilidad inicial
+  saveProducto(); saveServicio();
+  indice = 0; respuestas = {}; modoActual = 'producto';
+  actualizarPanelProductoVisible(true);
   const tag = document.getElementById('producto-tag');
-  if (tag) tag.textContent = ''; // limpiar textos viejos hasta actualizar
+  if (tag) tag.textContent = '';
   mostrarSeccion('cuestionario');
   mostrarPregunta();
 }
 
 function actualizarPanelProductoVisible(visible) {
-  document.getElementById('panel-producto').classList.toggle('oculto', !visible);
-  document.getElementById('panel-servicio').classList.toggle('oculto', visible);
-  // actualizar tabs aria
+  const pnlProd = document.getElementById('panel-producto');
+  const pnlServ = document.getElementById('panel-servicio');
   const tabProd = document.getElementById('tab-producto');
   const tabServ = document.getElementById('tab-servicio');
-  if (tabProd && tabServ) {
+  
+  if (pnlProd) pnlProd.classList.toggle('oculto', !visible);
+  if (pnlServ) pnlServ.classList.toggle('oculto', visible);
+  if (tabProd) {
     tabProd.setAttribute('aria-selected', visible);
-    tabServ.setAttribute('aria-selected', !visible);
     tabProd.classList.toggle('tab-activo', visible);
+  }
+  if (tabServ) {
+    tabServ.setAttribute('aria-selected', !visible);
     tabServ.classList.toggle('tab-activo', !visible);
   }
-  // actualizar fase actual según modo visible
-  actualizarFaseActual();
+  if (visible) actualizarFaseActual();
 }
 
 function actualizarPanelServicioVisible(visible) {
@@ -167,25 +171,40 @@ function actualizarPanelServicioVisible(visible) {
 
 function actualizarFaseActual() {
   const dim = dimDePregunta(indice);
-  document.getElementById('fase-actual').textContent = 'Fase: ' + dim.fase + ' · ' + dim.nombre;
+  const el = document.getElementById('fase-actual');
+  if (el) el.textContent = 'Fase: ' + dim.fase + ' · ' + dim.nombre;
 }
 
+// ---------- CAMBIO DE MODALIDAD ----------
+// Recibe el elemento DOM del tab pulsado y lee su data-mododo
 function cambiarModo(tabBtn) {
-  modoActual = tabBtn.dataset.modo === 'servicio' ? 'servicio' : 'producto';
-  // guardar preferencia en localStorage
+  const modo = tabBtn.getAttribute('data-modo');
+  modoActual = modo === 'servicio' ? 'servicio' : 'producto';
   try { localStorage.setItem('lids_modo', modoActual); } catch (e) {}
   actualizarPanelProductoVisible(modoActual === 'producto');
 }
 
+// ---------- MOSTRAR PREGUNTA ACTUAL ----------
 function mostrarPregunta() {
-  const p = modoActual === 'producto' ? PREGUNTAS_PROD[indice] : PREGUNTAS_SERV[indice];
+  const preguntas = modoActual === 'producto' ? PREGUNTAS_PROD : PREGUNTAS_SERV;
+  const p = preguntas[indice];
   const dim = dimDePregunta(indice);
-  document.getElementById('fase-actual').textContent = 'Fase: ' + dim.fase + ' · ' + dim.nombre;
-  document.getElementById('pregunta-actual').textContent = (indice + 1) + '/' + (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length) + '. ' + p.texto;
-  document.getElementById('pregunta-desc').textContent = p.desc;
-  document.getElementById('pregunta-help').setAttribute('data-tip', p.ayuda || 'Valora del 1 al 5 según tu ' + (modoActual === 'producto' ? 'producto' : 'servicio') + '.');
+  
+  const elFase = document.getElementById('fase-actual');
+  const elPregunta = document.getElementById('pregunta-actual');
+  const elDesc = document.getElementById('pregunta-desc');
+  const elHelp = document.getElementById('pregunta-help');
+  
+  if (elFase) elFase.textContent = 'Fase: ' + dim.fase + ' · ' + dim.nombre;
+  if (elPregunta) elPregunta.textContent = (indice + 1) + '/' + (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length) + '. ' + p.texto;
+  if (elDesc) elDesc.textContent = p.desc;
+  
+  if (elHelp) elHelp.setAttribute('data-tip', p.ayuda || 'Valora del 1 al 5 según tu ' + (modoActual === 'producto' ? 'producto' : 'servicio') + '.');
+  
   const box = document.getElementById('opciones');
+  if (!box) return;
   box.innerHTML = '';
+  
   const actual = respuestas[indice];
   OPCIONES.forEach(([v, label]) => {
     const lab = document.createElement('label');
@@ -198,13 +217,22 @@ function mostrarPregunta() {
     });
     box.appendChild(lab);
   });
-  document.getElementById('btn-atras').disabled = indice === 0;
-  document.getElementById('btn-siguiente').textContent = indice === (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length) - 1 ? 'Ver resultados ✓' : 'Siguiente →';
-  const pct = (indice / (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length)) * 100;
-  document.getElementById('barra-progreso').value = pct;
-  document.getElementById('progreso-texto').textContent = 'Pregunta ' + (indice + 1) + ' de ' + (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length);
+  
+  const btnAtras = document.getElementById('btn-atras');
+  if (btnAtras) btnAtras.disabled = indice === 0;
+  
+  const btnSiguiente = document.getElementById('btn-siguiente');
+  if (btnSiguiente) {
+    btnSiguiente.textContent = indice === (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length) - 1 ? 'Ver resultados ✓' : 'Siguiente →';
+  }
+  
+  const pctBar = document.getElementById('barra-progreso');
+  const txtProgreso = document.getElementById('progreso-texto');
+  if (pctBar) pctBar.value = (indice / (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length)) * 100;
+  if (txtProgreso) txtProgreso.textContent = 'Pregunta ' + (indice + 1) + ' de ' + (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length);
 }
 
+// ---------- NAVIGATION ----------
 function siguiente() {
   if (!respuestas[indice]) { alert('Selecciona una opción 1-5 para continuar.'); return; }
   if (indice < (modoActual === 'producto' ? PREGUNTAS_PROD.length : PREGUNTAS_SERV.length) - 1) { indice++; mostrarPregunta(); }
@@ -213,6 +241,7 @@ function siguiente() {
 
 function atras() { if (indice > 0) { indice--; mostrarPregunta(); } }
 
+// ---------- RESULTADOS ----------
 function calcularScores() {
   const scores = {};
   DIMENSIONES.forEach(d => {
@@ -225,12 +254,11 @@ function calcularScores() {
 
 function finalizar() {
   const scores = calcularScores();
-  const prod = getProducto(); // siempre guardar producto/servicio actual al finalizar
-  // también guardar el modo actual para restauración futura
+  const prod = getProducto();
   try { localStorage.setItem('lids_modo', modoActual); } catch (e) {}
   window.__lastScores = scores;
   window.__lastDims = DIMENSIONES;
-  window.__producto = prod; // reutilizamos variable para resumen (puede ser servicio)
+  window.__producto = prod;
   mostrarSeccion('resultados');
   generarGraficoRadar(scores, DIMENSIONES);
   mostrarPuntuaciones(scores, DIMENSIONES, respuestas, mapaPreguntasPorDim());
@@ -238,16 +266,27 @@ function finalizar() {
   const media = Object.values(scores).reduce((a, b) => a + b, 0) / DIMENSIONES.length;
   const peor = [...DIMENSIONES].sort((a, b) => scores[a.id] - scores[b.id])[0];
   const nombreLabel = prod.nombre ? (modoActual === 'producto' ? '📦 ' : '🛎 ') : '';
-  document.getElementById('resumen-global').innerHTML =
-    (prod.nombre ? nombreLabel + '<strong>' + prod.nombre.replace(/</g, '&lt;') + '</strong><br>' : '') +
-    'Media global: <strong>' + media.toFixed(1) + ' / 5</strong> · Prioridad: <strong>' + peor.nombre + ' (' + scores[peor.id].toFixed(1) + ')</strong>';
-  document.getElementById('sugerencias-output').textContent = 'Sugerencias locales ya visibles arriba. Usa IA solo si quieres redacción ampliada.';
+  const elGlobal = document.getElementById('resumen-global');
+  if (elGlobal) {
+    elGlobal.innerHTML = (prod.nombre ? nombreLabel + '<strong>' + prod.nombre.replace(/</g, '&lt;') + '</strong><br>' : '') +
+      'Media global: <strong>' + media.toFixed(1) + ' / 5</strong> · Prioridad: <strong>' + peor.nombre + ' (' + scores[peor.id].toFixed(1) + ')</strong>';
+  }
+  const elSugOutput = document.getElementById('sugerencias-output');
+  if (elSugOutput) elSugOutput.textContent = 'Sugerencias locales ya visibles arriba. Usa IA solo si quieres redacción ampliada.';
   try { localStorage.setItem('lids_last', JSON.stringify({ respuestas, scores, producto: prod })); } catch (e) {}
 }
 
 function exportar() {
-  const prod = getProducto(); // o podría leer modoActual para elegir qué guardar
-  const data = { fecha: new Date().toISOString(), producto: prod, modo: modoActual, respuestas, scores: window.__lastScores || calcularScores(), dimensiones: DIMENSIONES, preguntas: modoActual === 'producto' ? PREGUNTAS_PROD : PREGUNTAS_SERV };
+  const prod = getProducto();
+  const data = { 
+    fecha: new Date().toISOString(), 
+    producto: prod, 
+    modo: modoActual, 
+    respuestas, 
+    scores: window.__lastScores || calcularScores(), 
+    dimensiones: DIMENSIONES, 
+    preguntas: modoActual === 'producto' ? PREGUNTAS_PROD : PREGUNTAS_SERV 
+  };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -256,8 +295,123 @@ function exportar() {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
+// ---------- IA CONFIGURATION ----------
+function initIAConfig() {
+  const selProv = document.getElementById('ia-proveedor');
+  const selMod = document.getElementById('ia-modelo');
+  const inpKey = document.getElementById('ia-clave');
+  if (!selProv) return;
+  
+  function proveedorValido(p) { return (p && PROVEEDORES[p]) ? p : 'gemini'; }
+  function getKey(provider) { return localStorage.getItem('lids_apikey_' + provider) || ''; }
+  
+  limpiarProveedoresRetirados();
+  selProv.value = proveedorValido(localStorage.getItem('lids_provider'));
+  
+  function refrescar() {
+    const p = proveedorValido(selProv.value);
+    selProv.value = p;
+    selMod.innerHTML = '';
+    if (PROVEEDORES[p] && PROVEEDORES[p].modelos) {
+      PROVEEDORES[p].modelos.forEach(m => {
+        const o = document.createElement('option');
+        o.value = m; o.textContent = m;
+        selMod.appendChild(o);
+      }
+    }
+    const savedMod = localStorage.getItem('lids_model_' + p);
+    if (savedMod && (PROVEEDORES[p].modelos || []).includes(savedMod)) selMod.value = savedMod;
+    inpKey.value = getKey(p);
+    const elEstado = document.getElementById('ia-estado');
+    if (elEstado) elEstado.textContent = 'Proveedor: ' + PROVEEDORES[p].label + '. ' + (getKey(p) ? 'Clave guardada ✓' : 'Sin clave: solo sugerencias locales.');
+  }
+  
+  selProv.addEventListener('change', refrescar);
+  refrescar();
+  
+  document.getElementById('btn-guardar-clave').addEventListener('click', () => {
+    const p = proveedorValido(selProv.value);
+    localStorage.setItem('lids_provider', p);
+    localStorage.setItem('lids_model_' + p, selMod.value);
+    localStorage.setItem('lids_apikey_' + p, inpKey.value.trim());
+    const elEstado = document.getElementById('ia-estado');
+    if (elEstado) elEstado.textContent = inpKey.value.trim() ? 'Clave guardada local ✓' : 'Clave borrada. Modo offline.';
+  });
+  
+  document.getElementById('btn-probar-ia').addEventListener('click', probarConexionIA);
+  document.getElementById('btn-volver-intro').addEventListener('click', () => {
+    mostrarSeccion(window.__lastScores ? 'resultados' : 'intro');
+  });
+}
+
+function setEstado(msg) {
+  const el = document.getElementById('ia-estado');
+  if (el) el.textContent = msg;
+}
+
+// ---------- SUGERENCIAS LOCALES ----------
+const SUGERENCIAS_LOCALES = {
+  materiales_bajo_impacto: [
+    'Sustituir plásticos vírgenes por reciclados o biobasados certificados (ej. rPET, PLA).',
+    'Eliminar sustancias SVHC / retardantes halogenados; pedir FDS a proveedores.',
+    'Priorizar madera FSC, acero reciclado o aluminio secundario según pieza.'
+  ],
+  reduccion_material: [
+    'Aligerar pieza con nervaduras / topología; objetivo -15% peso sin perder función.',
+    'Reducir espesor o número piezas; unificar funciones en una sola.',
+    'Eliminar sobrematerial de embalaje interno; diseño encajable.'
+  ],
+  produccion_limpia: [
+    'Cambiar a procesos baja Tª / bajo residuo (unión mecánica vs soldadura).',
+    'Medir scrap y retrabajo; meta <3%; reutilizar mermas en misma línea.',
+    'Sustituir disolventes por base agua; filtrar y recircular refrigerante.'
+  ],
+  distribucion: [
+    'Diseño flat-pack / apilable; aumentar densidad carga +30%.',
+    'Embalaje mono-material cartón reciclado; eliminar EPS.',
+    'Agrupar envíos y priorizar transporte terrestre / marítimo vs aéreo.'
+  ],
+  impacto_uso: [
+    'Reducir consumo energético en uso: modo eco, apagado auto, motor IE4.',
+    'Diseñar para bajo consumible (agua, tinta, filtros lavables).',
+    'Incluir manual uso eficiente + indicador consumo visible.'
+  ],
+  vida_util: [
+    'Piezas desgaste estándar y desmontables con tornillo Torx, no pegadas.',
+    'Ofrecer kit reparación + guía despiece; garantía extendida 5 años.',
+    'Acabados durables reparables (aceite vs barniz) y repuestos 10 años.'
+  ],
+  fin_vida: [
+    'Marcaje material ISO 11469 en plásticos >50 g; evitar mezclas inseparables.',
+    'Uniones reversibles: clips + máximo 3 familias material por módulo.',
+    'Plan take-back / segunda vida; contacto gestor autorizado en etiqueta.'
+  ],
+  nuevo_concepto: [
+    'Evaluar producto como servicio (alquiler, refill, reparación pagada).',
+    'Función compartida / modular ampliable en vez de vender unidad nueva.',
+    'Digitalizar parte función (app vs hardware extra) para desmaterializar.'
+  ]
+};
+
+function mostrarSugerenciasLocales(scores, dimensiones) {
+  const cont = document.getElementById('sugerencias-locales');
+  if (!cont) return;
+  const orden = [...dimensiones].sort((a, b) => (scores[a.id] || 0) - (scores[b.id] || 0));
+  const peores = orden.slice(0, 2);
+  cont.innerHTML = '';
+  peores.forEach(d => {
+    const v = (scores[d.id] || 0).toFixed(1);
+    const div = document.createElement('div');
+    div.className = 'sug' + ((scores[d.id] || 0) >= 3 ? ' media' : '');
+    const items = (SUGERENCIAS_LOCALES[d.id] || []).map(s => '<li>' + s + '</li>').join('');
+    div.innerHTML = '<strong>' + d.nombre + ' (' + v + '/5) — prioridad alta:</strong><ul>' + items + '</ul>';
+    cont.appendChild(div);
+  });
+}
+
+// ---------- INICIALIZACIÓN CUANDO CARGA EL DOC ----------
 document.addEventListener('DOMContentLoaded', () => {
-  initIAConfig();
+  // Botones principales
   document.getElementById('btn-iniciar').addEventListener('click', iniciar);
   document.getElementById('btn-config').addEventListener('click', () => mostrarSeccion('config-ia'));
   document.getElementById('btn-config2').addEventListener('click', () => mostrarSeccion('config-ia'));
@@ -268,20 +422,29 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-exportar').addEventListener('click', exportar);
   document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
   document.getElementById('btn-reiniciar').addEventListener('click', () => location.reload());
-
-  // Restaurar modo guardado (producto o servicio) al recargar
+  
+  // Restaurar modo guardado al recargar
   try {
     const guardado = localStorage.getItem('lids_modo');
-    if (guardado) { modoActual = guardado; } // por defecto ya es 'producto' al inicio
+    if (guardado) { modoActual = guardado; }
   } catch (e) {}
-  // Aplicar modo guardado después de que el DOM esté listo (tabs ya existen)
+  
+  // Aplicar modo guardado después de un breve retardo
   setTimeout(() => { actualizarPanelProductoVisible(modoActual === 'producto'); }, 10);
-
-  // Listeners de tabs Producto/Servicio
-  document.getElementById('tab-producto').addEventListener('click', () => cambiarModo({ dataset: { modo: 'producto' } }));
-  document.getElementById('tab-servicio').addEventListener('click', () => cambiarModo({ dataset: { modo: 'servicio' } }));
-
-  // Restaurar producto/servicio guardado
+  
+  // ---------- LISTENERS DE TABS Producto/Servicio ----------
+  // Los tabs tienen data-modo="producto" y data-modo="servicio" en el HTML
+  const tabProd = document.getElementById('tab-producto');
+  const tabServ = document.getElementById('tab-servicio');
+  
+  if (tabProd) {
+    tabProd.addEventListener('click', (e) => cambiarModo(tabProd));
+  }
+  if (tabServ) {
+    tabServ.addEventListener('click', (e) => cambiarModo(tabServ));
+  }
+  
+  // Restaurar producto/servicio guardado en los campos
   try {
     const prod = JSON.parse(localStorage.getItem('lids_producto') || 'null');
     if (prod && prod.nombre) { document.getElementById('producto-nombre').value = prod.nombre; }
@@ -291,13 +454,55 @@ document.addEventListener('DOMContentLoaded', () => {
     if (serv && serv.desc) { document.getElementById('servicio-desc').value = serv.desc; }
     window.__producto = prod; window.__servicio = serv;
   } catch (e) {}
+  
   document.getElementById('producto-nombre').addEventListener('input', saveProducto);
   document.getElementById('producto-desc').addEventListener('input', saveProducto);
   document.getElementById('servicio-nombre').addEventListener('input', saveServicio);
   document.getElementById('servicio-desc').addEventListener('input', saveServicio);
-  // Restaurar última sesión si existe (compatibilidad con modo anterior)
+  
+  // Restaurar última sesión si existe
   try {
     const last = JSON.parse(localStorage.getItem('lids_last') || 'null');
     if (last && last.respuestas && Object.keys(last.respuestas).length > 0) { respuestas = last.respuestas; }
   } catch (e) {}
 });
+
+// ---------- IA CONFIGURATION FUNCTIONS ----------
+function probarConexionIA() {
+  const p = proveedorValido(document.getElementById('ia-proveedor').value);
+  const key = document.getElementById('ia-clave').value.trim();
+  if (!key) { setEstado('Pega clave primero.'); return; }
+  setEstado('Probando ' + PROVEEDORES[p].label + '...');
+  try {
+    const m = document.getElementById('ia-modelo').value;
+    const r = fetch(PROVEEDORES[p].url + encodeURIComponent(m) + ':generateContent?key=' + encodeURIComponent(key), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Responde solo: OK' }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 100 } })
+    });
+    r.then(response => {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    }).then(data => {
+      if (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
+        setEstado('✓ Conexión ' + PROVEEDORES[p].label + ' OK.');
+      } else {
+        throw new Error('Respuesta inesperada');
+      }
+    }).catch(e => {
+      setEstado('❌ Fallo: ' + e.message);
+    });
+  } catch (e) {
+    setEstado('❌ Fallo: ' + e.message);
+  }
+}
+
+function proveedorValido(p) { return (p && PROVEEDORES[p]) ? p : 'gemini'; }
+
+const PROVEEDORES = {
+  gemini: {
+    label: 'Google Gemini',
+    url: 'https://generativelanguage.googleapis.com/v1beta/models/',
+    modelos: ['gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
+  }
+};
