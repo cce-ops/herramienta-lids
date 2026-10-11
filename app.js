@@ -14,7 +14,7 @@ const DIMENSIONES = [
   { id: 'distribucion', nombre: '4) Distribución eficiente', fase: 'Distribución',
     terms: [{ t: 'Envase menor/limpio/reutilizable', q: 1 }, { t: 'Transporte eficiente', q: 0 }, { t: 'Logística eficiente', q: 0 }] },
   { id: 'impacto_uso', nombre: '5) Impacto en uso', fase: 'Uso',
-    terms: [{ t: 'Menor consumo energía', q: 0 }, { t: 'Fuente limpia', q: 0 }, { t: 'Menor consumibles', q: 0 }, { t: 'Cero desperdicio', q: 1 }] },
+    terms: [{ t: 'Menor consumo energía', q: 0 }, { t: 'Fuente limpia', q: 0 }, { t: 'Menos consumibles', q: 0 }, { t: 'Cero desperdicio', q: 1 }] },
   { id: 'vida_util', nombre: '6) Vida útil producto', fase: 'Uso',
     terms: [{ t: 'Fiabilidad y durabilidad', q: 0 }, { t: 'Fácil reparación', q: 0 }, { t: 'Estructura modular', q: 1 }, { t: 'Diseño clásico', q: 0 }, { t: 'Vínculo usuario', q: 1 }] },
   { id: 'fin_vida', nombre: '7) Fin de vida', fase: 'Fin de vida',
@@ -29,32 +29,32 @@ const PREGUNTAS_PROD = [
     ayuda: 'Revisa fichas de seguridad (FDS) y cada pieza: PVC, retardantes halogenados, plomo, sustancias SVHC. 1 = no sabes qué contiene. 5 = inventario completo y ya sustituiste lo peor.' },
   { dim: 'reduccion_material', texto: '¿Producto aligerado al mínimo necesario?', desc: 'Espesores, nervaduras, piezas multifunción. 1=sobredimensionado, 5=optimizado topológico.',
     ayuda: '¿Pesa lo mínimo sin romperse ni perder función? 1 = macizo o sobredimensionado por si acaso. 5 = nervaduras, espesores ajustados o diseño optimizado. Compara con una alternativa ligera.' },
-  { dim: 'reduccion_material', texto: '¿Minimiza embalaje y material auxiliar?', desc: 'Flat‑pack, granel, sin EPS. 1=doble embalaje, 5=mono‑material mínimo.',
+  { dim: 'reduccion_material', texto: '¿Minimiza embalaje y material auxiliar?', desc: 'Flat-pack, granel, sin EPS. 1=doble embalaje, 5=mono-material mínimo.',
     ayuda: 'Cuenta todo lo que acompaña al producto: cajas, espumas, film, bridas. 1 = doble caja con espuma. 5 = encaja sin relleno y en un solo material reciclable.' },
   { dim: 'produccion_limpia', texto: '¿Proceso productivo eficiente y limpio?', desc: 'Bajo consumo, poco scrap, sin disolventes. 1=alto residuo, 5=circuito cerrado.',
     ayuda: 'Piensa por unidad fabricada: energía, agua, recortes (scrap) y disolventes. 1 = mucho residuo y olor a disolvente. 5 = mermas por debajo del 3% reutilizadas, base agua, circuito cerrado.' },
-  { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental?', desc: 'Energía renovable, ISO 14001, proximidad. 1=sin criterio, 5=auditoría + local.',
-    ayuda: '¿De dónde viene cada parte y con qué energía se fabrica? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con ISO 14001 y energía renovable demostrable.' },
+  { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental?', desc: 'Energía renovable, ISO 14001, proximidad. 1=sin criterio, 5=auditoría + local.',
+    ayuda: '¿De dónde viene cada parte y con qué energía se fabrica? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con ISO 14001 y energía renovable demostrable.' },
   { dim: 'distribucion', texto: '¿Logística optimizada en volumen y distancia?', desc: 'Apilable, carga completa, tramo corto. 1=aire + vacío, 5=densidad máxima terrestre.',
     ayuda: 'Mira camión o contenedor: ¿viaja lleno? ¿cuántos km? 1 = medio vacío o por avión. 5 = apilable, carga completa y tramo corto por tierra o mar.' },
-  { dim: 'distribucion', texto: '¿Embalaje reutilizable / reciclable?', desc: 'Mono‑material, retornable. 1=mezcla inseparable que acaba en basura. 5=retornable documentado.',
+  { dim: 'distribucion', texto: '¿Embalaje reutilizable / reciclable?', desc: 'Mono-material, retornable. 1=mixto no reciclable, 5=retornable documentado.',
     ayuda: '¿El envase vuelve o se recicla fácil? 1 = mezcla inseparable que acaba en basura. 5 = retornable con recogida o de un solo material con reciclaje claro.' },
   { dim: 'impacto_uso', texto: '¿Bajo consumo energía / agua durante uso?', desc: 'Modo eco, clase A, sin consumibles. 1=alto consumo continuo, 5=casi cero + indicador.',
     ayuda: 'Mide lo que gasta en un uso típico (kWh, agua, consumibles). 1 = siempre encendido y gasta mucho. 5 = modo eco, apagado automático y consumo casi cero visible.' },
-  { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente?', desc: 'Manual, auto‑apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.',
+  { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente?', desc: 'Manual, auto-apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.',
     ayuda: '¿El diseño evita que se use mal? 1 = sin manual ni avisos. 5 = guía clara, apagado auto y mantenimiento tan obvio que no hay que explicarlo.' },
-  { dim: 'vida_util', texto: '¿Durable y reparable?', desc: 'Tornillos estándar, repuestos 10 años. 1=pegado desechable, 5=kit reparación + garantía 5 años.',
-    ayuda: '¿Se rompe pronto? ¿Se puede abrir? 1 = pegado y sin repuestos, de usar y tirar. 5 = tornillos estándar, repuestos 10 años y kit o garantía de reparación.' },
-  { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas estándar?', desc: 'Filtros lavables, desgaste sustituible. 1=sellado, 5=usuario repara en 10 min.',
-    ayuda: '¿Lo mantiene el usuario sin taller? 1 = solo servicio oficial. 5 = filtros lavables y piezas de desgaste cambiables en 10 min con guía.' },
-  { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas?', desc: 'Clips, 3 materiales máx, marcado ISO. 1=>15 min / especial, 5=<3 min reversibles.',
-    ayuda: 'Cronometra abrirlo con un destornillador normal. 1 = más de 15 min, herramienta especial o se rompe. 5 = menos de 3 min con clips o tornillos y plásticos marcados para reciclar.' },
-  { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida?', desc: 'Take‑back, reacondicionado, gestor. 1=vertedero, 5=canal activo + etiqueta.',
+  { dim: 'vida_util', texto: '¿Durable y reparable?', desc: 'Tornillos estándar, repuestos 10 años. 1=pegado desechable, 5=kit reparación + garantía 5a.',
+    ayuda: '¿Se rompe pronto? ¿Se puede abrir? 1 = pegado y sin repuestos, de usar y tirar. 5 = tornillos estándar, repuestos 10 años y kit o garantía de reparación.' },
+  { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas estándar?', desc: 'Filtros lavables, desgaste sustituible. 1=sellado, 5=usuario repara en 10 min.',
+    ayuda: '¿Lo mantiene el usuario sin taller? 1 = solo servicio oficial. 5 = filtros lavables y piezas de desgaste cambiables en 10 minutos con guía.' },
+  { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas?', desc: 'Clips, 3 materiales máx, marcado ISO. 1=>15 min / especial, 5=<3 min reversibles.',
+    ayuda: 'Cronometra abrirlo con un destornillador normal. 1 = más de 15 min, herramienta especial o se rompe. 5 = menos de 3 min con clips o tornillos y plásticos marcados para reciclar.' },
+  { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida?', desc: 'Take-back, reacondicionado, gestor. 1=vertedero, 5=canal activo + etiqueta.',
     ayuda: '¿Qué pasa cuando muere el producto? 1 = a la basura sin más. 5 = lo recoges, se reacondiciona o indicas gestor autorizado al usuario.' },
   { dim: 'nuevo_concepto', texto: '¿Modelo innovador desmaterializa función?', desc: 'Alquiler, refill, modular, digital. 1=venta lineal, 5=servicio probado.',
     ayuda: '¿Vendes el objeto o la función que cumple? 1 = venta lineal de usar y tirar. 5 = alquiler, recarga (refill), módulos ampliables o versión digital ya funcionando.' },
   { dim: 'nuevo_concepto', texto: '¿Aporta beneficio social / sistémico claro?', desc: 'Acceso compartido, empleo local reparación. 1=ninguno, 5=medido y comunicado.',
-    ayuda: '¿A quién beneficia además del comprador? 1=ninguno, 5=uso compartido, reparación local u otro impacto medido y comunicado al usuario.' }
+    ayuda: '¿A quién beneficia además del comprador? 1 = nada medido. 5 = uso compartido, reparación local u otro impacto medido y comunicado al usuario.' }
 ];
 
 // Preguntas modo Servicio (mismas dimensiones, redacción adaptada)
@@ -62,33 +62,33 @@ const PREGUNTAS_SERV = [
   { dim: 'materiales_bajo_impacto', texto: '¿El servicio evita materiales vírgenes o críticos por uso?', desc: 'Infraestructura, hardware, licencias. 1=vírgenes sin control, 5=predominantemente renovables o reciclados.',
     ayuda: 'Revisa qué hardware/licencias se proveen. 1 = compra nueva cada vez. 5 = renovables, reciclados o reacondicionados con inventario conocido.' },
   { dim: 'materiales_bajo_impacto', texto: '¿Evita sustancias tóxicas o críticas en infraestructura?', desc: 'HVAC químico, refrigerantes, componentes con metales críticos. 1=sin inventario, 5=inventario completo + sustitución.',
-    ayuda: 'Revisa componentes químicos y de hardware: retardantes halogenados, plomo, cobalto crítico. 1 = no sabe qué contiene. 5 = inventario completo y ya sustituyó lo peor.' },
+    ayuda: 'Revisa componentes químicos y de hardware: refrigerantes halogenados, plomo, cobalto crítico. 1 = no sabe qué contiene. 5 = inventario completo y ya sustituyó lo peor.' },
   { dim: 'reduccion_material', texto: '¿Infrastructure aligerada al mínimo necesario?', desc: 'Servidores, ancho de red, recursos asignados. 1=sobredimensionado, 5=optimizado topológicamente.',
-    ayuda: '¿Los recursos usados son estrictamente los mínimos? 1 = sobre‑provisionado por seguridad. 5 = topología eficiente, sin desperdicio de capacidad.' },
-  { dim: 'reduccion_material', texto: '¿Minimiza recursos auxiliares y embalaje digital?', desc: 'Adjuntos, cache, logs, paquetes innecesarios. 1=doble embalaje, 5=mono‑material mínimo.',
+    ayuda: '¿Los recursos usados son estrictamente los mínimos? 1 = sobre-provisionado por seguridad. 5 = topología eficiente, sin desperdicio de capacidad.' },
+  { dim: 'reduccion_material', texto: '¿Minimiza recursos auxiliares y embalaje digital?', desc: 'Adjuntos, cache, logs, paquetes innecesarios. 1=doble embalaje, 5=mono-material mínimo.',
     ayuda: 'Cuenta todo lo adicional: logs excesivos, archivos temporales sin purgar, paquetes redundantes. 1 = generosos sin cleaning. 5 = purge automática, sin caché residual.' },
-  { dim: 'produccion_limpia', texto: '¿Procesos de puesta en marcha y operación eficaces y limpios?', desc: 'Consumo energía, proveedores, centro de datos. 1=alto residuo, 5=circuito cerrado o renovables.',
+  { dim: 'produccion_limpia', texto: '¿Procesos de puesta en marcha y operación eficientes y limpios?', desc: 'Consumo energía, proveedores, centro de datos. 1=alto residuo, 5=circuito cerrado o renovables.',
     ayuda: 'Piensa por sesión/hora: energía, agua, recortes y químicos. 1 = mucho residuo y alto consumo. 5 = base agua, eficiencia certificada, reutilización mermas.' },
   { dim: 'produccion_limpia', texto: '¿Proveedores con criterio ambiental demostrable?', desc: 'Energía renovable, certificaciones, proximidad. 1=sin criterio, 5=auditoría + local.',
     ayuda: '¿De dónde viene cada parte y con qué energía? 1 = origen desconocido o muy lejano. 5 = proveedores cercanos, con energía verde demostrada.' },
   { dim: 'distribucion', texto: '¿Canales de distribución optimizados en volumen y distancia?', desc: 'Descargas, CDN, delivery digital. 1=aire + vacío, 5=densidad máxima terrestre/marítima.',
     ayuda: 'Mira ancho de banda o transfers: ¿quién entrega y cuántos km/saltos? 1 = descarga por enlace lento o transfer intercontinental. 5 = CDN local o distribución P2P eficiente.' },
-  { dim: 'distribucion', texto: '¿Embalaje/Retorno optimizado?', desc: 'Digital=meta‑cero físicos. 1=materiales físicos innecesarios, 5=servicios retornables o take‑back documentado.',
+  { dim: 'distribucion', texto: '¿Embalaje/Retorno optimizado?', desc: 'Digital=meta-cero físicos. 1=materiales físicos innecesarios, 5=servicios retornables o take-back documentado.',
     ayuda: '¿Hay materiales físicos al inicio o al fin? 1 = siempre vienen con caja/folleto físico. 5 = totalmente digital o con retorno documentado.' },
   { dim: 'impacto_uso', texto: '¿Consumo energía / agua durante uso de usuario final bajo?', desc: 'Dispositivos, endpoints, uso real. 1=alto consumo continuo, 5=casi cero + indicador.',
     ayuda: 'Mide lo que gasta el equipo del usuario final en uso típico. 1 = siempre encendido y gasta mucho. 5 = modo eco, apagado automático, consumo casi cero visible.' },
-  { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente por usuario?', desc: 'Manual, auto‑apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.',
+  { dim: 'impacto_uso', texto: '¿Informa y facilita uso eficiente por usuario?', desc: 'Manual, auto-apagado, mantenimiento simple. 1=sin info, 5=guía + diseño que evita mal uso.',
     ayuda: '¿El diseño evita que se use mal? 1 = sin manual ni avisos. 5 = guía clara, apagado auto y mantenimiento tan obvio que no hay que explicarlo.' },
-  { dim: 'vida_util', texto: '¿Durable y reparable la infrastructure?', desc: 'Componentes, actualizaciones, reemplazables. 1=pegado obsoleto, 5=kit reparación + garantía extendida.',
-    ayuda: '¿Se rompe pronto? ¿Se puede actualizar o reparar? 1 = sellado y de usar y tirar. 5 = piezas intercambiables, garantía 5 + años.' },
-  { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas/actualizaciones estándar?', desc: 'Guías, herramientas, reemplazables. 1=sellado, 5=usuario repara en 10 min o actualiza sin técnico.',
-    ayuda: '¿Lo mantiene el usuario sin asistencia técnica? 1 = solo servicio oficial. 5 = filtros lavables y piezas/actualizaciones auto‑reparables en 10 min.' },
-  { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas para transición?', desc: 'Actualizaciones, migración, cese operaciones. 1=>15 min / especial, 5=<3 min reversibles.',
-    ayuda: 'Cronometra cerrar o migrar el servicio. 1 = más de 15 min, herramienta especial o se rompe. 5 = menos de 3 min con pasos simples y documentados.' },
-  { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida / reacondicionado?', desc: 'Take‑back, reacondicionado, gestor. 1=vertedero, 5=canal activo + etiqueta.',
+  { dim: 'vida_util', texto: '¿Durable y reparable la infraestructura?', desc: 'Componentes, actualizaciones, reemplazables. 1=pegado obsoleto, 5=kit reparación + garantía extendida.',
+    ayuda: '¿Se rompe pronto? ¿Se puede actualizar o reparar? 1 = sellado y de usar y tirar. 5 = piezas intercambiables, garantía 5+ años.' },
+  { dim: 'vida_util', texto: '¿Mantenimiento fácil y piezas/actualizaciones estándar?', desc: 'Guías, herramientas, reemplazables. 1=sellado, 5=usuario repara en 10 min o actualiza sin técnico.',
+    ayuda: '¿Lo mantiene el usuario sin asistencia técnica? 1 = solo servicio oficial. 5 = filtros lavables y piezas/actualizaciones auto-reparables en 10 min.' },
+  { dim: 'fin_vida', texto: '¿Desmontaje rápido con pocas herramientas para transición?', desc: 'Actualizaciones, migración, cese operaciones. 1=>15 min / especial, 5=<3 min reversibles.',
+    ayuda: 'Cronometra cerrar o migrar el servicio. 1 = más de 15 min, herramienta especial o se rompe. 5 = menos de 3 min con pasos simples y documentados.' },
+  { dim: 'fin_vida', texto: '¿Existe plan recogida / segunda vida / reacondicionado?', desc: 'Take-back, reacondicionado, gestor. 1=vertedero/o nada, 5=canal activo + etiqueta.',
     ayuda: '¿Qué pasa cuando muere el servicio o caduca? 1 = a la basura / sin más. 5 = lo recoges, se reacondiciona o indicas gestor autorizado al usuario.' },
   { dim: 'nuevo_concepto', texto: '¿Modelo innovador desmaterializa función?', desc: 'SaaS, refill, modular, digital. 1=venta lineal, 5=servicio probado.',
-    ayuda: '¿Vendes la función o el objeto/licencia? 1 = venta lineal de licencia perpetua. 5 = alquiler, recarga (refill), módulos ampliables o versión digital ya funcionando.' },
+    ayuda: '¿Vende la función o el objeto/licencia? 1 = venta lineal de licencia perpetua. 5 = alquiler, recarga (refill), módulos ampliables o versión digital ya funcionando.' },
   { dim: 'nuevo_concepto', texto: '¿Aporta beneficio social / sistémico claro?', desc: 'Acceso compartido, empleo local reparación. 1=ninguno, 5=medido y comunicado.',
     ayuda: '¿A quién beneficia además del contratante/usuario? 1=ninguno, 5=uso compartido, reparación local u otro impacto medido y comunicado al usuario.' }
 ];
@@ -395,13 +395,16 @@ function initIAConfig() {
     try {
       const p = localStorage.getItem('lids_provider');
       if (p && !PROVEEDORES[p]) localStorage.removeItem('lids_provider');
+      // Only remove known provider key patterns, NOT lids_modo
       Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('lids_') && !PROVEEDORES[k.replace(/lids_(model|apikey)_/, '')]) {
-          localStorage.removeItem(k);
+        if (k === 'lids_modo') return; // skip lids_mode preference
+        if (k.startsWith('lids_model_') || k.startsWith('lids_apikey_')) {
+          const provider = k.replace(/lids_(model|apikey)_/, '');
+          if (!PROVEEDORES[provider]) localStorage.removeItem(k);
         }
       });
-    } catch (e) {}
-  }
+    });
+  } catch (e) {}
   limpiarProveedoresRetirados();
   selProv.value = proveedorValido(localStorage.getItem('lids_provider'));
   function refrescar() {
@@ -477,10 +480,12 @@ const PROVEEDORES = {
   }
 };
 
+/* ---------- PEGAR EN EL DOM ---------- */
 function pegarEnElDOM(id, contenido) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = contenido;
 }
+/* ---------- MOSTRAR SECCIÓN ---------- */
 function mostrarSeccion(id) {
   ['intro','config-ia','cuestionario','resultados'].forEach(s => {
     const e = document.getElementById(s);
@@ -488,6 +493,7 @@ function mostrarSeccion(id) {
   });
   window.scrollTo(0, 0);
 }
+/* ---------- INICIALIZACIÓN ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   // Botones principales
   document.getElementById('btn-iniciar').addEventListener('click', iniciar);
@@ -526,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('servicio-nombre').addEventListener('input', saveServicio);
   document.getElementById('servicio-desc').addEventListener('input', saveServicio);
 
-  // Restaurar última sesión si existía
+  // Restaurar última sesión si existia
   try {
     const last = JSON.parse(localStorage.getItem('lids_last') || 'null');
     if (last && last.respuestas && Object.keys(last.respuestas).length > 0) { respuestas = last.respuestas; }
