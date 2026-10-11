@@ -64,7 +64,7 @@ const PREGUNTAS_SERV = [
     ayuda: 'Revisa qué hardware/licencias se proveen. 1 = compra nueva cada vez. 5 = renovables, reciclados o reacondicionados con inventario conocido.' },
   { dim: 'materiales_bajo_impacto', texto: '¿Evita sustancias tóxicas o críticas en infraestructura?', desc: 'HVAC químico, refrigerantes, componentes con metales críticos. 1=sin inventario, 5=inventario completo + sustitución.',
     ayuda: 'Revisa componentes químicos y de hardware: refrigerantes halogenados, plomo, cobalto crítico. 1 = no sabe qué contiene. 5 = inventario completo y ya sustituyó lo peor.' },
-  { dim: 'reduccion_material', texto: '¿Infrafructura aligerada al mínimo necesario?', desc: Servidores, ancho de red, recursos asignados. 1=sobredimensionado, 5=optimizado topológico.',
+  { dim: 'reduccion_material', texto: '¿Infrafructura aligerada al mínimo necesario?', desc: 'Servidores, ancho de red, recursos asignados. 1=sobredimensionado, 5=optimizado topológico.',
     ayuda: '¿Los recursos usados son estrictamente los mínimos? 1 = sobre-provisionado por seguridad. 5 = topología eficiente, sin desperdicio de capacidad.' },
   { dim: 'reduccion_material', texto: '¿Minimiza recursos auxiliares y embalaje digital?', desc: 'Adjuntos, cache, logs, paquetes innecesarios. 1=doble embalaje, 5=mono-material mínimo.',
     ayuda: 'Cuenta todo lo adicional: logs excesivos, archivos temporales sin purgar, paquetes redundantes. 1 = generosos sin cleaning. 5 = purge automática, sin caché residual.' },
