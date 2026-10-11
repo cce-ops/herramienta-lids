@@ -137,8 +137,8 @@ function saveServicio() {
 
 function iniciar() {
   saveProducto(); saveServicio(); // guardar ambos en caso de cambio de tab después
-  indice = 0; respuestas = {}; modoActual = 'producto'; // reset a producto por defecto
-  actualizarPanelProductoVisible(true); // asegurar visibilidad inicial
+  indice = 0; respuestas = {}; // conservar modoActual (producto o servicio) según tab activa
+  actualizarPanelProductoVisible(modoActual === 'producto');
   const tag = document.getElementById('producto-tag');
   if (tag) tag.textContent = ''; // limpiar textos viejos hasta actualizar
   mostrarSeccion('cuestionario');
