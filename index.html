@@ -9,36 +9,19 @@
 <body>
   <header>
     <h1>🌿 Herramienta de Diagnóstico de Ecodiseño (Rueda LIDS)</h1>
-    <p class="sub">100 % gratuita · Funciona sin internet · IA opcional</p>
+    <p class="sub">100% gratuita · Funciona sin internet · IA opcional</p>
   </header>
-
   <main>
     <section id="intro">
-      <h2>¿Qué evalúa? 
-        <span class="help" tabindex="0" data-tip="Cómo funciona: 1) Elige Producto o Servicio. 2) Describe tu caso abajo. 3) Responde 16 preguntas puntuando del 1 al 5. 4) Mira tu gráfico radar y las 2 prioridades. 5) Lee sugerencias offline y, si quieres, genera extras con IA.">?</span>
-      </h2>
+      <h2>¿Qué evalúa? <span class="help" tabindex="0" data-tip="Cómo funciona: 1) Elige Producto o Servicio. 2) Describe tu caso abajo. 3) Responde 16 preguntas puntuando del 1 al 5. 4) Mira tu gráfico radar y las 2 prioridades. 5) Lee sugerencias offline y, si quieres, genera extras con IA.">?</span></h2>
       <p>Cuestionario guiado por fases del ciclo de vida. 16 preguntas en 8 estrategias LIDS. Resultado: gráfico radar + sugerencias técnicas.</p>
 
-      <!-- ========  TABS  ========= -->
+      <!-- Tabs Producto / Servicio -->
       <div class="tabs" role="tablist" aria-label="Tipo de evaluación">
-        <button role="tab"
-                id="tab-producto"
-                class="tab-activo"
-                aria-selected="true"
-                aria-controls="panel-producto"
-                tabindex="0"
-                data-modo="producto">📦 Producto</button>
-
-        <button role="tab"
-                id="tab-servicio"
-                class=""
-                aria-selected="false"
-                aria-controls="panel-servicio"
-                tabindex="-1"
-                data-modo="servicio">🛎 Servicio</button>
+        <button role="tab" id="tab-producto" class="tab-activo" aria-selected="true" aria-controls="panel-producto" tabindex="0" data-modo="producto">📦 Producto</button>
+        <button role="tab" id="tab-servicio" class="" aria-selected="false" aria-controls="panel-servicio" tabindex="-1" data-modo="servicio">🛎 Servicio</button>
       </div>
 
-      <!-- ====================  LISTA DE FASES (PRODUCTO) ==================== -->
       <ol class="fases-lista" id="fases-lista-producto">
         <li><strong>Materiales:</strong> bajo impacto + reducción uso</li>
         <li><strong>Producción:</strong> técnicas limpias</li>
@@ -47,113 +30,110 @@
         <li><strong>Fin de vida:</strong> desmontaje y reciclaje</li>
         <li><strong>Transversal:</strong> nuevo concepto</li>
       </ol>
+      <ol class="fases-lista oculto" id="fases-lista-servicio">
+        <li><strong>Materiales:</strong> recursos físicos + digitales</li>
+        <li><strong>Operación:</strong> infraestructura y procesos</li>
+        <li><strong>Distribución:</strong> canales y logística</li>
+        <li><strong>Uso:</strong> consumo usuario + energía</li>
+        <li><strong>Fin de vida:</strong> baja y transición</li>
+        <li><strong>Transversal:</strong> modelo de negocio</li>
+      </ol>
 
-      <!-- ====================  PANEL PRODUCTO ==================== -->
       <div class="producto-box" id="panel-producto">
         <h3>📦 Tu producto <span class="help" tabindex="0" data-tip="Escribe qué objeto diseñaste para que la IA dé consejos específicos y no genéricos. Nombre: ej. Diadema gaming plegable. Descripción: materiales, cómo se usa y qué pasa al final de su vida. Ej.: Estructura ABS + almohadillas poliéster, uso diario 4h, desmontable con tornillos.">?</span></h3>
         <p class="nota">Describe el objeto diseñado. IA usa este contexto + puntuaciones LIDS para consejos específicos.</p>
         <label>Nombre producto
           <input type="text" id="producto-nombre" placeholder="Ej. Silla oficina modular" maxlength="80" autocomplete="off">
         </label>
-        <label>Descripci&oacute;n: materiales, uso, fin vida previsto
-          <textarea id="producto-desc" rows="3" placeholder="Ej. Carcasa PP + estructura acero, uso oficina 8h/d&iacute;a, desmontable con tornillos..."></textarea>
+        <label>Descripción: materiales, uso, fin vida previsto
+          <textarea id="producto-desc" rows="3" placeholder="Ej. Carcasa PP + estructura acero, uso oficina 8h/día, desmontable con tornillos..."></textarea>
         </label>
       </div>
 
-      <!-- ====================  PANEL SERVICIO ==================== -->
       <div class="producto-box oculto" id="panel-servicio">
-        <h3>🛎 Tu servicio <span class="help" tabindex="0" data-tip="Describe el servicio que eval&uacute;s. Nombre: ej. Plataforma streaming v&iacute;deo. Descripci&oacute;n: infraestructura (servidores, red), usuarios, canal de acceso, qu&eacute; pasa al cancelar. Ej.: CDN global, 10M usuarios, app m&oacute;vil/web, datos exportables al dar de baja.">?</span></h3>
-        <p class="nota">Describe el servicio dise&ntilde;ado. IA usa este contexto + puntuaciones LIDS para consejos espec&iacute;ficos.</p>
+        <h3>🛎 Tu servicio <span class="help" tabindex="0" data-tip="Describe el servicio que evalúas. Nombre: ej. Plataforma streaming vídeo. Descripción: infraestructura (servidores, red), usuarios, canal de acceso, qué pasa al cancelar. Ej.: CDN global, 10M usuarios, app móvil/web, datos exportables al dar de baja.">?</span></h3>
+        <p class="nota">Describe el servicio diseñado. IA usa este contexto + puntuaciones LIDS para consejos específicos.</p>
         <label>Nombre servicio
-          <input type="text" id="servicio-nombre" placeholder="Ej. Plataforma streaming v&iacute;deo" maxlength="80" autocomplete="off">
+          <input type="text" id="servicio-nombre" placeholder="Ej. Plataforma streaming vídeo" maxlength="80" autocomplete="off">
         </label>
-        <label>Descripci&oacute;n: infraestructura, usuarios, canal, fin de vida
-          <textarea id="servicio-desc" rows="3" placeholder="Ej. CDN global + servidores eficaces, 10M usuarios, app m&oacute;bil/web, datos exportables al dar de baja..."></textarea>
+        <label>Descripción: infraestructura, usuarios, canal, fin de vida
+          <textarea id="servicio-desc" rows="3" placeholder="Ej. CDN global + servidores eficientes, 10M usuarios, app móvil/web, datos exportables al cancelar..."></textarea>
         </label>
       </div>
-
       <div class="fila">
         <button id="btn-iniciar">Comenzar Cuestionario</button>
         <button id="btn-config" class="secundario">⚙️ Configurar IA (opcional)</button>
       </div>
-      <p class="nota">Sin clave API funciona igual: sugerencias locales automáticas. IA solo mejora redacci&oacute;n.</p>
+      <p class="nota">Sin clave API funciona igual: sugerencias locales automáticas. IA solo mejora redacción.</p>
     </section>
 
-    <!-- ====================  CONFIGURACIÓN DE IA ==================== -->
     <section id="config-ia" class="oculto">
-      <h2>⚙️ Configuraci&oacute;n IA (opcional) <span class="help" tabindex="0" data-tip="Privacidad: tu clave se guarda solo en este navegador (no viaja a ning&uacute;n servidor salvo al proveedor de IA que elijas al generar). Nunca est&aacute; en el c&oacute;digo ni se comparte. Cada persona usa su propia clave gratuita.">?</span></h2>
-      <p>Necesita internet solo aqu&iacute;. Clave queda en tu navegador, nunca sale a otro servidor salvo proveedor elegido.</p>
-
+      <h2>⚙️ Configuración IA (opcional) <span class="help" tabindex="0" data-tip="Privacidad: tu clave se guarda solo en este navegador (no viaja a ningún servidor salvo al proveedor de IA que elijas al generar). Nunca está en el código ni se comparte. Cada persona usa su propia clave gratuita.">?</span></h2>
+      <p>Necesita internet solo aquí. Clave queda en tu navegador, nunca sale a otro servidor salvo proveedor elegido.</p>
       <label>Proveedor
         <select id="ia-proveedor">
           <option value="gemini">Google Gemini</option>
         </select>
       </label>
-
       <label>Modelo
         <select id="ia-modelo"></select>
       </label>
-
       <label>Clave API
-        <input type="password" id="ia-clave" placeholder="Pega tu clave aqu&iacute;" autocomplete="off">
+        <input type="password" id="ia-clave" placeholder="Pega tu clave aquí" autocomplete="off">
       </label>
-
       <div class="fila">
         <button id="btn-guardar-clave">Guardar</button>
-        <button id="btn-probar-ia" class="secundario">Probar conexi&oacute;n</button>
+        <button id="btn-probar-ia" class="secundario">Probar conexión</button>
         <button id="btn-volver-intro" class="secundario">Volver</button>
       </div>
       <p id="ia-estado" class="nota"></p>
       <details>
-        <summary>¿D&oacute;nde consigo clave gratis?</summary>
+        <summary>¿Dónde consigo clave gratis?</summary>
         <ul>
-          <li><strong>Gemini:</strong> aistudio.google.com → “Get API Key”. Cuota gratuita.</li>
+          <li><strong>Gemini:</strong> aistudio.google.com → Get API Key. Cuota gratuita.</li>
         </ul>
       </details>
     </section>
 
-    <!-- ====================  CUestionario ==================== -->
     <section id="cuestionario" class="oculto">
       <p id="producto-tag" class="nota"></p>
       <p id="fase-actual" class="fase"></p>
       <h2 id="pregunta-actual"></h2>
       <span id="pregunta-help" class="help" tabindex="0" data-tip="">?</span>
       <p id="pregunta-desc" class="nota"></p>
-      <p class="nota">Valora del 1 (nada / m&iacute;nimo) al 5 (excelente) seg&uacute;n tu <span id="modo-actual"></span>
+      <p class="nota">Valora del 1 (nada / mínimo) al 5 (excelente) según tu producto. <span class="help" tabindex="0" data-tip="16 preguntas, 2 por cada estrategia LIDS. Sé honesto: el 1 y el 2 también son útiles porque marcan dónde mejorar. Puedes volver atrás y cambiar respuestas.">?</span></p>
       <div id="opciones" role="radiogroup"></div>
       <div class="fila">
         <button id="btn-atras" class="secundario">← Atrás</button>
-        <button id="btn-siguiente" class="secundario">Siguiente →</button>
+        <button id="btn-siguiente">Siguiente →</button>
       </div>
       <progress id="barra-progreso" value="0" max="100"></progress>
       <p id="progreso-texto" class="nota"></p>
     </section>
 
-    <!-- ====================  RESULTADOS ==================== -->
     <section id="resultados" class="oculto">
       <h2>Resultados del Diagnóstico</h2>
       <p id="resumen-global"></p>
       <div class="grafico-contenedor"><canvas id="radarChart" width="600" height="600"></canvas></div>
       <div id="puntuaciones"></div>
-      <p class="nota">Cada t&eacute;rmino se pinta seg&uacute;n tu respuesta en su pregunta: <span class="term-ok">verde logrado (4–5)</span> · <span class="term-med">naranja parcial (3)</span> · <span class="term-mal">rojo a mejorar (1–2)</span>.</p>
-
-      <h3>🤖 Sugerencias con IA (opcional) <span class="help" tabindex="0" data-tip="Si el primer resultado sale pobre o incompleto (pocos bullets, una sola dimensi&oacute;n), pulsa Regenerar: lo intenta de nuevo, a veces con otro modelo de respaldo, hasta dar 2 dimensiones con 3 consejos cada una.">?</span></h3>
+      <p class="nota">Cada término se pinta según tu respuesta en su pregunta: <span class="term-ok">verde logrado (4–5)</span> · <span class="term-med">naranja parcial (3)</span> · <span class="term-mal">rojo a mejorar (1–2)</span>.</p>
+      <h3>🔧 Sugerencias técnicas (offline, automáticas)</h3>
+      <div id="sugerencias-locales"></div>
+      <h3>🤖 Sugerencias con IA (opcional) <span class="help" tabindex="0" data-tip="Si el primer resultado sale pobre o incompleto (pocos bullets, una sola dimensión), pulsa Regenerar: lo intenta de nuevo, a veces con otro modelo de respaldo, hasta dar 2 dimensiones con 3 consejos cada una.">?</span></h3>
       <div class="fila">
         <button id="btn-sugerencias">Generar con IA</button>
         <button id="btn-regenerar" class="secundario">↻ Regenerar</button>
         <button id="btn-config2" class="secundario">Cambiar proveedor / clave</button>
       </div>
-      <div id="sugerencias-output">Sugerencias locales ya visibles arriba. Usa IA solo si quieres redacci&oacute;n ampliada.</div>
+      <div id="sugerencias-output">Sugerencias locales ya visibles arriba. Usa IA solo si quieres redacción ampliada.</div>
       <div class="fila">
         <button id="btn-exportar" class="secundario">⬇ Exportar JSON</button>
         <button id="btn-imprimir" class="secundario">🖨 Imprimir / PDF</button>
         <button id="btn-reiniciar" class="secundario">Reiniciar</button>
       </div>
     </section>
-
-    <footer><p>Rueda LIDS (Brezet &amp; van Hemel) · Uso educativo · Sin dependencias · Doble clic en index.html basta</p></footer>
   </main>
-
+  <footer><p>Rueda LIDS (Brezet &amp; van Hemel) · Uso educativo · Sin dependencias · Doble clic en index.html basta</p></footer>
   <script src="radar.js"></script>
   <script src="ai-suggestions.js"></script>
   <script src="app.js"></script>
