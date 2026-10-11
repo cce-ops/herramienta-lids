@@ -113,6 +113,14 @@ function dimDePregunta(i) {
   return DIMENSIONES.find(d => d.id === p.dim);
 }
 
+// Mapa dimensión -> índices de preguntas (según modo actual)
+function mapaPreguntasPorDim() {
+  const m = {};
+  const preguntas = modoActual === 'producto' ? PREGUNTAS_PROD : PREGUNTAS_SERV;
+  preguntas.forEach((p, i) => { (m[p.dim] = m[p.dim] || []).push(i); });
+  return m;
+}
+
 function getProducto() {
   const n = (document.getElementById('producto-nombre').value || '').trim();
   const d = (document.getElementById('producto-desc').value || '').trim();
