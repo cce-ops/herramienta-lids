@@ -278,8 +278,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => { actualizarPanelProductoVisible(modoActual === 'producto'); }, 10);
 
   // Listeners de tabs Producto/Servicio
-  document.getElementById('tab-producto').addEventListener('click', () => cambiarModo({ dataset: { modo: 'producto' } }));
-  document.getElementById('tab-servicio').addEventListener('click', () => cambiarModo({ dataset: { modo: 'servicio' } }));
+  const tabProducto = document.getElementById('tab-producto');
+  const tabServicio = document.getElementById('tab-servicio');
+  if (tabProducto) tabProducto.addEventListener('click', (e) => cambiarModo(tabProducto));
+  if (tabServicio) tabServicio.addEventListener('click', (e) => cambiarModo(tabServicio));
 
   // Restaurar producto/servicio guardado
   try {
