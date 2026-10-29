@@ -48,7 +48,7 @@ const PROVEEDORES = {
   gemini: {
     label: 'Google Gemini',
     url: 'https://generativelanguage.googleapis.com/v1beta/models/',
-    modelos: ['gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
+    modelos: ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
   }
 };
 
